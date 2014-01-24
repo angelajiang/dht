@@ -33,6 +33,13 @@ func main() {
 
     fmt.Printf("kademlia starting up!\n")
     kadem := kademlia.NewKademlia()
+    fmt.Printf("buckets capacity: %v\n", cap(kadem.Buckets))
+    fmt.Printf("id: %d\n", kadem.NodeID)
+    tmp_bucket := kadem.Buckets[0]
+    tmp_id := kadem.NodeID
+    tmp_ip := net.ParseIP("127.0.0.1")
+    tmp_contact := kademlia.Contact{tmp_id, tmp_ip, 4000}
+    kademlia.Update(tmp_contact, tmp_bucket)
 
     rpc.Register(kadem)
     rpc.HandleHTTP()
