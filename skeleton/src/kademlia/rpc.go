@@ -3,7 +3,9 @@ package kademlia
 // strictly to these to be compatible with the reference implementation and
 // other groups' code.
 
-import "net"
+import (
+    "net"
+)
 
 
 // Host identification.
