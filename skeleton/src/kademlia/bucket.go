@@ -6,13 +6,17 @@ import (
 )
 
 type Bucket struct {
-    Contacts [NUMBUCKETS]Contact
-    First int
-    Last int        //index to last contact in the bucket
-    Size int
+    Contacts []Contact
+}
+
+func NewBucket() *Bucket{
+    bucket_ptr := new(Bucket)
+    (*bucket_ptr).Contacts = make([]Contact,0,NUMCONTACTS)
+    return new(Bucket)
 }
 
 func Update(contact Contact, bucket Bucket) error {
+    /*
     in_bucket := InBucket(contact, bucket)
     is_full := IsFull(bucket)
     switch {
@@ -32,22 +36,27 @@ func Update(contact Contact, bucket Bucket) error {
             //Move head to tail
 
     }
+    */
     return errors.New("function not implemented")
 }
 
 func InBucket(contact Contact, bucket Bucket) bool {
+    /*
     for  i:=0; i<bucket.Last; i++{
         if bucket.Contacts[i].NodeID == contact.NodeID{
             return true
         }
     }
+    */
     return false
 }
 
 func IsFull(bucket Bucket) bool {
+    /*
     if NUMBUCKETS == bucket.Last{
         return true
     }
+    */
     return false
 }
 

@@ -9,12 +9,17 @@ const NUMCONTACTS int = 20
 
 type Kademlia struct {
     NodeID ID
-    Buckets [NUMBUCKETS]Bucket
+    Buckets []Bucket
 }
 
 func NewKademlia() *Kademlia {
     // TODO: Assign yourself a random ID and prepare other state here.
-    return new(Kademlia)
+    kptr := new(Kademlia)
+    k := *kptr
+    k.Buckets = make([]Bucket, NUMBUCKETS)
+    k.Buckets[0] = *(NewBucket())
+
+    return kptr
 }
 
 
