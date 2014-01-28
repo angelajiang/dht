@@ -16,43 +16,44 @@ func NewBucket() *Bucket{
     return bucket_ptr
 }
 
-func Update(contact Contact, bucket Bucket) error {
+func Update(contact Contact, bucket_addr *Bucket) error {
+    bucket := *bucket_addr
     in_bucket, index:= InBucket(contact, bucket)
     is_full := IsFull(bucket)
     switch {
     case in_bucket:
         /*Move contact to end of bucket's contact list*/
+        fmt.Printf("Case: in_bucket\n")
         bucket.Contacts = append(bucket.Contacts[:index-1],bucket.Contacts[(index+1):]...)
         bucket.Contacts = append(bucket.Contacts, contact)
     case !in_bucket && !is_full:
-        //TODO: if empty, just add to list
-        if len(bucket.Contacts) == 0{
-            bucket.Contacts = append(bucket.Contacts, contact)
+        if len(bucket_addr.Contacts) == 0{
+            fmt.Printf("Case: !in_bucket, !is_full, empty\n")
+            bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
         }else{
-            fmt.Printf("Bucket capacity: %v\n", cap(bucket.Contacts))
-            pong, err := DoPing(bucket.Contacts[0].Host, bucket.Contacts[0].Port)
-            fmt.Printf("%+v\n", pong)
-            fmt.Printf("%s\n", err)
+            fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
+            /*
+            pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
             if err != nil{
-                bucket.Contacts = append(bucket.Contacts[1:], contact)
+                bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
             }
-            bucket.Contacts = append(bucket.Contacts, contact)
+            */
+            bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
         }
     case !in_bucket && is_full:
+        fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        pong, err := DoPing(bucket.Contacts[0].Host, bucket.Contacts[0].Port)
+        pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
         fmt.Printf("%s\n", err)
         if err != nil{
-            bucket.Contacts = append(bucket.Contacts[1:], contact)
+            //drop head append contact to end of list
+            bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
+        }else{
+            //Move head to tail
+            bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
         
-        //if head fails to respond
-            //drop head
-            //append contact to end of list
-        //else
-            //Move head to tail
-
     }
     return errors.New("function not implemented")
 }

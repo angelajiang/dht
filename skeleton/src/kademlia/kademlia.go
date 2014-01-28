@@ -9,7 +9,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 20
+const NUMCONTACTS int = 1
 
 type Kademlia struct {
     NodeID ID
