@@ -6,6 +6,11 @@ package kademlia
 
 import (
     "net"
+    "net/rpc"
+    "strconv"
+    "fmt"
+    "strings"
+    "log"
 )
 
 const NUMBUCKETS int =  160
@@ -27,11 +32,45 @@ func NewKademlia() *Kademlia {
 }
 
 func DoPing(remote_host net.IP, port uint16) (Pong, error){
-    tmp_id := NewRandomID()
-    tmp_ip := net.ParseIP("127.0.0.1")
-    tmp_contact := Contact{tmp_id, tmp_ip, 4000}
-    tmp_pong := Pong{tmp_id, tmp_contact}
-    return tmp_pong, nil
+    peer_str := HostPortToPeerStr(remote_host, port)
+    client, err := rpc.DialHTTP("tcp", peer_str)
+    ping := new(Ping)
+    ping.MsgID = NewRandomID()
+    var pong Pong
+    err = client.Call("Kademlia.Ping", ping, &pong)
+    if err != nil {
+          log.Fatal("Call: ", err)
+    }
+    rpc.DialHTTP("tcp", peer_str)
+    return pong, nil
 }
+
+/*HELPERS*/
+
+func PeerStrToHostPort(listen_str string) (net.IP, uint16){
+    /*Parsing*/
+    input_arr := strings.Split(listen_str, ":")
+    host_str := input_arr[0]
+    port_str := input_arr[1]
+    //Check if localhost
+    if host_str == "localhost"{
+        host_str = "127.0.0.1"
+    }
+    listen_netip := net.ParseIP(host_str)
+    peer_uint64, _ := strconv.ParseUint(port_str, 10, 16)
+    peer_uint16 := uint16(peer_uint64)
+
+    return listen_netip, peer_uint16
+}
+
+func HostPortToPeerStr(remote_host net.IP, port uint16) (peer_str string){
+    remote_host_str := remote_host.String()
+    port_uint64 := uint64(port)
+    port_str :=  strconv.FormatUint(port_uint64, 10)
+    peer_str = remote_host_str + ":" + port_str
+    fmt.Printf("peer string: %v\n", peer_str)
+    return peer_str
+}
+
 
 

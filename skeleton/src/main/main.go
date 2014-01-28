@@ -1,5 +1,4 @@
-package main
-
+package main 
 import (
     "flag"
     "fmt"
@@ -28,11 +27,12 @@ func main() {
     if len(args) != 2 {
         log.Fatal("Must be invoked with exactly two arguments!\n")
     }
-    listenStr := args[0]
+    listen_str := args[0]
     firstPeerStr := args[1]
 
     fmt.Printf("kademlia starting up!\n")
     kadem := kademlia.NewKademlia()
+    /*
     tmp_id := kadem.NodeID
     tmp_ip := net.ParseIP("127.0.0.1")
     tmp_contact := kademlia.Contact{tmp_id, tmp_ip, 4000}
@@ -44,11 +44,10 @@ func main() {
     tmp_contact = kademlia.Contact{tmp_id, tmp_ip, 5000}
     kademlia.Update(tmp_contact, &kadem.Buckets[0])
     fmt.Printf("contact list length (2) %v\n", len(kadem.Buckets[0].Contacts))
-
-
+    */
     rpc.Register(kadem)
     rpc.HandleHTTP()
-    l, err := net.Listen("tcp", listenStr)
+    l, err := net.Listen("tcp", listen_str)
     if err != nil {
         log.Fatal("Listen: ", err)
     }
@@ -73,5 +72,10 @@ func main() {
 
     log.Printf("ping msgID: %s\n", ping.MsgID.AsString())
     log.Printf("pong msgID: %s\n", pong.MsgID.AsString())
+
+    var pong2 kademlia.Pong
+    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(listen_str)
+    pong2, err = kademlia.DoPing(listen_netip, peer_uint16)
+    log.Printf("pong msg from doping %v\n", pong2.MsgID.AsString())
 }
 
