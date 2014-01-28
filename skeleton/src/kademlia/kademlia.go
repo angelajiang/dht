@@ -14,20 +14,25 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 1
+const NUMCONTACTS int = 10
 
 type Kademlia struct {
     NodeID ID
     Buckets []Bucket
+    Host net.IP
+    Port uint16
 }
 
-func NewKademlia() *Kademlia {
+func NewKademlia(host net.IP, port uint16) *Kademlia {
     // TODO: Assign yourself a random ID and prepare other state here.
     kptr := new(Kademlia)
     kptr.NodeID = NewRandomID()
     kptr.Buckets = make([]Bucket, NUMBUCKETS)
-    kptr.Buckets[0] = *(NewBucket())
-
+    for i,_ := range kptr.Buckets{
+        kptr.Buckets[i] = *(NewBucket())
+    }
+    kptr.Host = host
+    kptr.Port = port
     return kptr
 }
 
@@ -38,6 +43,7 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     ping.MsgID = NewRandomID()
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
+    fmt.Printf("after call\n")
     if err != nil {
           log.Fatal("Call: ", err)
     }

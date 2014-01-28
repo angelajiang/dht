@@ -32,20 +32,22 @@ func Update(contact Contact, bucket_addr *Bucket) error {
             bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
         }else{
             fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
+            fmt.Printf("host: %v\n", bucket_addr.Contacts[0].Host)
+            fmt.Printf("host: %v\n", bucket_addr.Contacts[0].Port)
             /*
             pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+            mt.Printf("%+v\n", pong)
             if err != nil{
                 bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
             }
-            */
             bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
+            */
         }
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
         pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
-        fmt.Printf("%s\n", err)
         if err != nil{
             //drop head append contact to end of list
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
@@ -53,7 +55,6 @@ func Update(contact Contact, bucket_addr *Bucket) error {
             //Move head to tail
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
-        
     }
     return errors.New("function not implemented")
 }
