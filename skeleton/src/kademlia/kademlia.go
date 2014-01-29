@@ -38,16 +38,21 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
 
 func DoPing(remote_host net.IP, port uint16) (Pong, error){
     peer_str := HostPortToPeerStr(remote_host, port)
+    fmt.Printf("peer_str in DoPing: %v\n", peer_str)
     client, err := rpc.DialHTTP("tcp", peer_str)
+    if err != nil {
+          log.Fatal("Call: ", err)
+    }
+    fmt.Printf("client in DoPing: %v\n", client)
     ping := new(Ping)
     ping.MsgID = NewRandomID()
+    //pong := new(Pong)
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
     fmt.Printf("after call\n")
     if err != nil {
           log.Fatal("Call: ", err)
     }
-    rpc.DialHTTP("tcp", peer_str)
     return pong, nil
 }
 

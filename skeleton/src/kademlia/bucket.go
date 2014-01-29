@@ -34,14 +34,12 @@ func Update(contact Contact, bucket_addr *Bucket) error {
             fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
             fmt.Printf("host: %v\n", bucket_addr.Contacts[0].Host)
             fmt.Printf("host: %v\n", bucket_addr.Contacts[0].Port)
-            /*
             pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
-            mt.Printf("%+v\n", pong)
+            fmt.Printf("%+v\n", pong)
             if err != nil{
                 bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
             }
             bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
-            */
         }
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
