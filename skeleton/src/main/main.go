@@ -1,4 +1,4 @@
-package main 
+package main
 import (
     "flag"
     "fmt"
@@ -8,6 +8,9 @@ import (
     "net/http"
     "net/rpc"
     "time"
+    "bufio"
+    "os"
+    "strings"
 )
 
 import (
@@ -58,20 +61,48 @@ func main() {
 
     log.Printf("ping msgID: %s\n", ping.MsgID.AsString())
     log.Printf("pong msgID: %s\n", pong.MsgID.AsString())
+   
+    for {
+        bio := bufio.NewReader(os.Stdin)
+        line, _, cmd_err := bio.ReadLine()
+        if cmd_err != nil {
+            log.Fatal("Scan failed: ", cmd_err)
+        }
+        cmdline := string(line)
+        cmdline_args := strings.Split(cmdline, " ")
+        fmt.Printf("arg1: %v\n", cmdline_args[0])
+        switch cmdline_args[0] {
+            case "ping":
+                var pong kademlia.Pong
+                host := cmdline_args[1]
+                listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host)
+                pong, err = kademlia.DoPing(listen_netip, peer_uint16)
+                log.Printf("pong msg from doping %v\n", pong.MsgID.AsString())
+
+            case "whoami":
+                fmt.Printf("whoami")
+            case "local_find_value":
+                fmt.Printf("local_find_value")
+        }
+    }
 
     var pong2 kademlia.Pong
     listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(first_peer_str)
     pong2, err = kademlia.DoPing(listen_netip, peer_uint16)
     log.Printf("pong msg from doping %v\n", pong2.MsgID.AsString())
-    
+
     //Making new contacts for testing Update
     tmp_id := kadem.NodeID
     tmp_ip := net.ParseIP("127.0.0.1")
     tmp_contact := kademlia.Contact{tmp_id, tmp_ip, 7890}
     kademlia.Update(tmp_contact, &kadem.Buckets[0])
 
-    //Putting value into tmp_contact for testing DoFindValue
+    tmp_id = kademlia.NewRandomID()
+    tmp_ip = net.ParseIP("123.123.123.123")
+    tmp_contact = kademlia.Contact{tmp_id, tmp_ip, 7890}
+    kademlia.Update(tmp_contact, &kadem.Buckets[0])
 
+    //Putting value into tmp_contact for testing DoFindValue
     s := make([]byte, 5)
     tmp_data := s
     fmt.Printf("tmpdata: %v\n", tmp_data)

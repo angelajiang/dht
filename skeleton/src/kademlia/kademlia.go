@@ -10,10 +10,11 @@ import (
     "strconv"
     "strings"
     "log"
+    "fmt"
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 10
+const NUMCONTACTS int = 1
 
 type Kademlia struct {
     NodeID ID
@@ -50,14 +51,17 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     if err != nil {
           log.Fatal("Call: ", err)
     }
+
+    fmt.Printf("pong struct now holds: %v\n", pong)
     return pong, nil
 }
 
-/*
-DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
+//DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
+func DoFindValue(remoteContact *Contact, Key ID){
     //Set up client.
     peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
     client, err := rpc.DialHTTP("tcp", peer_str)
+    fmt.Printf("Client in DoFindValue: %v\n", client)
     if err != nil {
         //maybe get rid of contact?
         log.Fatal("DialHttp: ", err)
@@ -68,8 +72,8 @@ DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
     //Get FindValueResult
     //If value is there, return data
     //else, call DoFindNode
+    return
 }
-*/
 /*HELPERS*/
 
 func PeerStrToHostPort(listen_str string) (net.IP, uint16){
