@@ -8,7 +8,6 @@ import (
     "net"
     "net/rpc"
     "strconv"
-    "fmt"
     "strings"
     "log"
 )
@@ -39,24 +38,38 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
 
 func DoPing(remote_host net.IP, port uint16) (Pong, error){
     peer_str := HostPortToPeerStr(remote_host, port)
-    fmt.Printf("peer_str in DoPing: %v\n", peer_str)
     client, err := rpc.DialHTTP("tcp", peer_str)
     if err != nil {
           log.Fatal("Call: ", err)
     }
-    fmt.Printf("client in DoPing: %v\n", client)
     ping := new(Ping)
     ping.MsgID = NewRandomID()
     //pong := new(Pong)
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
-    fmt.Printf("after call\n")
     if err != nil {
           log.Fatal("Call: ", err)
     }
     return pong, nil
 }
 
+/*
+DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
+    //Set up client.
+    peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
+    client, err := rpc.DialHTTP("tcp", peer_str)
+    if err != nil {
+        //maybe get rid of contact?
+        log.Fatal("DialHttp: ", err)
+    }
+    //Create FindValueRequest
+
+    //Call Kademlia.FindValue
+    //Get FindValueResult
+    //If value is there, return data
+    //else, call DoFindNode
+}
+*/
 /*HELPERS*/
 
 func PeerStrToHostPort(listen_str string) (net.IP, uint16){
@@ -80,7 +93,6 @@ func HostPortToPeerStr(remote_host net.IP, port uint16) (peer_str string){
     port_uint64 := uint64(port)
     port_str :=  strconv.FormatUint(port_uint64, 10)
     peer_str = remote_host_str + ":" + port_str
-    fmt.Printf("peer string: %v\n", peer_str)
     return peer_str
 }
 
