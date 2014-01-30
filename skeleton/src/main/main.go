@@ -64,6 +64,25 @@ func main() {
 
     log.Printf("ping msgID: %s\n", ping.MsgID.AsString())
     log.Printf("pong msgID: %s\n", pong.MsgID.AsString())
+
+    var pong2 kademlia.Pong
+    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(first_peer_str)
+    pong2, err = kademlia.DoPing(listen_netip, peer_uint16)
+    log.Printf("pong msg from doping %v\n", pong2.MsgID.AsString())
+
+    //Making new contacts and calling Update
+    tmp_id := kadem.NodeID
+    tmp_ip := net.ParseIP("127.0.0.1")
+    tmp_contact := kademlia.Contact{tmp_id, tmp_ip, 7890}
+    //kademlia.Update(tmp_contact, &kadem.Buckets[0])
+
+    //Putting value into tmp_contact for testing DoFindValue
+    s := make([]byte, 5)
+    tmp_id = kadem.NodeID
+    tmp_data := s
+    fmt.Printf("tmpdata: %v\n", tmp_data)
+    kademlia.DoFindValue(kadem, &tmp_contact, tmp_id)
+    
     /* looping forever, reading from stdin */
     for {
         bio := bufio.NewReader(os.Stdin)
@@ -98,6 +117,7 @@ func main() {
 
         }
     }
+<<<<<<< HEAD
 
 
     var pong2 kademlia.Pong
@@ -120,5 +140,7 @@ func main() {
     s := make([]byte, 5)
     tmp_data := s
     fmt.Printf("tmpdata: %v\n", tmp_data)
+=======
+>>>>>>> f410e71ff1d85b3ea51c9464070cb67e0a9e8dfe
 }
 
