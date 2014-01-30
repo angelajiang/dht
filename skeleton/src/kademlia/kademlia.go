@@ -21,6 +21,7 @@ type Kademlia struct {
     Buckets []Bucket
     Host net.IP
     Port uint16
+    Data map[ID][]byte
 }
 
 func NewKademlia(host net.IP, port uint16) *Kademlia {
