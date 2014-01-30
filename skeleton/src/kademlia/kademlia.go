@@ -22,6 +22,7 @@ type Kademlia struct {
     Host net.IP
     Port uint16
     Data map[ID][]byte
+    KContact Contact
 }
 
 func NewKademlia(host net.IP, port uint16) *Kademlia {
@@ -34,6 +35,11 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     }
     kptr.Host = host
     kptr.Port = port
+    c := new(Contact)
+    c.NodeID = kptr.NodeID
+    c.Host = host
+    c.Port = port
+    kptr.KContact = *c
     return kptr
 }
 
@@ -55,18 +61,31 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
 }
 
 //DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
-func DoFindValue(remoteContact *Contact, Key ID){
+func DoFindValue(k *Kademlia, remoteContact *Contact, Key ID){
     //Set up client.
     peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
     client, err := rpc.DialHTTP("tcp", peer_str)
-    fmt.Printf("Client in DoFindValue: %v\n", client)
     if err != nil {
         //maybe get rid of contact?
         log.Fatal("DialHttp: ", err)
     }
+    fmt.Printf("Client in DoFindValue: %v\n", client)
     //Create FindValueRequest
+    req := new(FindValueRequest)
+    req.Sender = k.KContact
+    req.MsgID = NewRandomID()
+    req.Key = Key
+
+    fmt.Printf("req in DoFindValue: %v\n", req)
 
     //Call Kademlia.FindValue
+    /*
+    result = new(FindValueResult)
+    err = client.Call("Kademlia.FindValue", req, &result)
+    if err != nil {
+          log.Fatal("Call: ", err)
+    }
+    */
     //Get FindValueResult
     //If value is there, return data
     //else, call DoFindNode
