@@ -45,14 +45,12 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     }
     ping := new(Ping)
     ping.MsgID = NewRandomID()
-    //pong := new(Pong)
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
     if err != nil {
           log.Fatal("Call: ", err)
     }
 
-    fmt.Printf("pong struct now holds: %v\n", pong)
     return pong, nil
 }
 
