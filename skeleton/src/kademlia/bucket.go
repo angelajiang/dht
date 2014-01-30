@@ -17,6 +17,7 @@ func NewBucket() *Bucket{
 }
 
 func Update(contact Contact, bucket_addr *Bucket) error {
+    fmt.Printf("bucket len in Update is: %v\n", len(bucket_addr.Contacts))
     bucket := *bucket_addr
     in_bucket, index:= InBucket(contact, bucket)
     is_full := IsFull(bucket)

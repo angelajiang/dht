@@ -14,7 +14,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 10
+const NUMCONTACTS int = 1
 
 type Kademlia struct {
     NodeID ID
@@ -54,6 +54,8 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     if err != nil {
           log.Fatal("Call: ", err)
     }
+
+    fmt.Printf("pong struct now holds: %v\n", pong)
     return pong, nil
 }
 
