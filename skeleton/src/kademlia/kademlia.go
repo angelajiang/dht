@@ -102,7 +102,7 @@ func DoFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult, 
     fmt.Printf("Client in DoFindValue: %v\n", client)
     //Create FindValueRequest
     req := new(FindValueRequest)
-    req.Sender = k.KContact         //Sender of the request?
+    req.Sender = k.KContact
     req.MsgID = NewRandomID()
     req.Key = Key
 
@@ -114,8 +114,7 @@ func DoFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult, 
     if err != nil {
           log.Fatal("Call: ", err)
     }
-    //If value is there, return data
-    //else, call DoFindNode
+    //result either has value or Nodes
     return result, nil
 }
 /*HELPERS*/
