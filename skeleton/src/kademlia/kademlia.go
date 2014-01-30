@@ -38,6 +38,7 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
 }
 
 func DoPing(remote_host net.IP, port uint16) (Pong, error){
+    /* DoPing should probably take a Kademlia object here */
     peer_str := HostPortToPeerStr(remote_host, port)
     client, err := rpc.DialHTTP("tcp", peer_str)
     if err != nil {
@@ -45,6 +46,8 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     }
     ping := new(Ping)
     ping.MsgID = NewRandomID()
+    //ping.Sender.NodeID = 
+
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
     if err != nil {
@@ -54,6 +57,33 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     return pong, nil
 }
 
+func DoStore(remote_contact *Contact, Key ID, Value []byte) error {
+    //initialize request and result structs
+    request := new(StoreRequest)
+    var store_result StoreResult
+
+    //set up rpc dial and all that jazz 
+    peer_str := HostPortToPeerStr(remote_contact.Host, remote_contact.Port)
+    client, err := rpc.DialHTTP("tcp", peer_str)
+    fmt.Printf("Client in DoFindValue: %v\n", client)
+    if err != nil {
+        log.Fatal("DialHttp: ", err)
+    }
+
+    //set up request struct
+    request.Sender = *(remote_contact)
+    request.MsgID = NewRandomID()
+    request.Key = Key
+    request.Value = Value
+
+    //make rpc call 
+    err = client.Call("Kademlia.Store", request, &store_result)
+    if err != nil {
+          log.Fatal("Call: ", err)
+    }
+
+    return nil
+}
 //DoFindValue(remoteContact *Contact, Key ID)(*FindValueResult, error){
 func DoFindValue(remoteContact *Contact, Key ID){
     //Set up client.

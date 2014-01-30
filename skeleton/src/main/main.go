@@ -34,7 +34,10 @@ func main() {
 
     fmt.Printf("kademlia starting up!\n")
     host, port := kademlia.PeerStrToHostPort(listen_str)
+    //fmt.Printf("host: %v\n", host)
+    //fmt.Printf("port: %v\n", port)
     kadem := kademlia.NewKademlia(host, port)
+    //fmt.Printf("kadem NodeID: %v\n", kadem.NodeID)
     rpc.Register(kadem)
     rpc.HandleHTTP()
     l, err := net.Listen("tcp", listen_str)
@@ -47,10 +50,10 @@ func main() {
     // Confirm our server is up with a PING request and then exit.
     // Your code should loop forever, reading instructions from stdin and
     // printing their results to stdout. See README.txt for more details.
+    client, err := rpc.DialHTTP("tcp", first_peer_str)
     if err != nil {
         log.Fatal("DialHTTP: ", err)
     }
-    client, err := rpc.DialHTTP("tcp", first_peer_str)
     ping := new(kademlia.Ping)
     ping.MsgID = kademlia.NewRandomID()
     var pong kademlia.Pong
@@ -74,12 +77,19 @@ func main() {
         command := cmdline_args[0]
         switch command {
             case "ping":
+                ping := new(kademlia.Ping)
+                ping.MsgID = kademlia.NewRandomID()
+                ping.Sender.NodeID = kadem.NodeID
+                fmt.Printf("sender NodeID: %v\n", ping.Sender.NodeID)
+                ping.Sender.Host = host
+                ping.Sender.Port = port
                 var pong_from_host kademlia.Pong
-                host := cmdline_args[1]
-                if strings.Contains(host, ":") {
-                    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host)
+                host_to_ping := cmdline_args[1]
+                if strings.Contains(host_to_ping, ":") {
+                    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
                     pong_from_host, err = kademlia.DoPing(listen_netip, peer_uint16)
                     log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
+                } else {
                 }
             case "whoami":
                 fmt.Printf("whoami")
@@ -88,6 +98,8 @@ func main() {
 
         }
     }
+
+
     var pong2 kademlia.Pong
     listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(first_peer_str)
     pong2, err = kademlia.DoPing(listen_netip, peer_uint16)
