@@ -101,7 +101,12 @@ type FindValueResult struct {
 }
 
 func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
-    // TODO: Implement.
+    res.MsgID = req.MsgID
+    if val,ok := k.Data[req.Key]; ok {
+        res.Value = val        
+    }else{
+        //call find node
+    }
     return nil
 }
 
