@@ -44,18 +44,15 @@ func DoPing(remote_host net.IP, port uint16) (Pong, error){
     if err != nil {
           log.Fatal("Call: ", err)
     }
-    fmt.Printf("client in DoPing: %v\n", client)
+    //fmt.Printf("client in DoPing: %v\n", client)
     ping := new(Ping)
     ping.MsgID = NewRandomID()
-    //pong := new(Pong)
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)
-    fmt.Printf("after call\n")
     if err != nil {
           log.Fatal("Call: ", err)
     }
 
-    fmt.Printf("pong struct now holds: %v\n", pong)
     return pong, nil
 }
 

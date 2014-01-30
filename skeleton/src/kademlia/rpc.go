@@ -5,6 +5,7 @@ package kademlia
 
 import (
     "net"
+    "fmt"
 )
 
 
@@ -30,6 +31,8 @@ type Pong struct {
 func (k *Kademlia) Ping(ping Ping, pong *Pong) error {
     // This one's a freebie.
     pong.MsgID = CopyID(ping.MsgID)
+    fmt.Printf("ping.MsgID from RPC call: %v\n", ping.MsgID.AsString())
+    fmt.Printf("pong.MsgID from RPC call: %v\n", pong.MsgID.AsString())
     pong.Sender.NodeID = k.NodeID
     pong.Sender.Host = k.Host
     pong.Sender.Port = k.Port
