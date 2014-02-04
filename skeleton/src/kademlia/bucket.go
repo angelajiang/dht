@@ -31,9 +31,9 @@ func Update(contact Contact, bucket_addr *Bucket) error {
         if len(bucket_addr.Contacts) == 0{
             fmt.Printf("Case: !in_bucket, !is_full, empty\n")
             bucket_addr.Contacts = append(bucket_addr.Contacts, contact)
-        }else{
+        } else {
             fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
-            pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+            pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
             fmt.Printf("%+v\n", pong)
             if err != nil{
                 bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
@@ -43,12 +43,12 @@ func Update(contact Contact, bucket_addr *Bucket) error {
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        pong, err := DoPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+        pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
         if err != nil{
             //drop head append contact to end of list
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:], contact)
-        }else{
+        } else {
             //Move head to tail
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
