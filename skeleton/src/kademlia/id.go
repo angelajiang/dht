@@ -90,3 +90,12 @@ func FromString(idstr string) (ret ID, err error) {
     return
 }
 
+func FromByteArray(byte_array []byte) (ret ID, err error) {
+    for i := 0; i < IDBytes; i++ {
+        ret[i] = byte_array[i]
+    }
+    if err != nil {
+        return
+    }
+    return
+}
