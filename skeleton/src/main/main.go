@@ -73,15 +73,19 @@ func main() {
     //Making new contacts and calling Update
     tmp_id := kadem.NodeID
     tmp_ip := net.ParseIP("127.0.0.1")
-    tmp_contact := kademlia.Contact{tmp_id, tmp_ip, 7890}
+    tmp_port := port
+    tmp_contact := kademlia.Contact{tmp_id, tmp_ip, tmp_port}
     //kademlia.Update(tmp_contact, &kadem.Buckets[0])
 
     //Putting value into tmp_contact for testing DoFindValue
     s := make([]byte, 5)
-    tmp_id = kadem.NodeID
+    tmp_key := kademlia.NewRandomID()
     tmp_data := s
     fmt.Printf("tmpdata: %v\n", tmp_data)
-    kademlia.DoFindValue(kadem, &tmp_contact, tmp_id)
+    kadem.Data[tmp_key] = tmp_data
+    res, _ := kademlia.DoFindValue(kadem, &tmp_contact, tmp_key)
+    fmt.Printf("DoFindValue response: %v\n",res)
+
     
     /* looping forever, reading from stdin */
     for {

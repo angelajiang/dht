@@ -15,6 +15,7 @@ import (
 
 const NUMBUCKETS int =  160
 const NUMCONTACTS int = 1
+const VALUESIZE int = 160
 
 type Kademlia struct {
     NodeID ID
@@ -35,6 +36,7 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     }
     kptr.Host = host
     kptr.Port = port
+    kptr.Data = make(map[ID][]byte, VALUESIZE)
     c := new(Contact)
     c.NodeID = kptr.NodeID
     c.Host = host
