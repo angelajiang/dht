@@ -102,7 +102,7 @@ func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
     for index := range indices{
         //Add contacts from buckets[index] until closestContacts is full
         should_continue := AddNodesFromBucket(k, index, requestID, closestContacts)
-        if should_continue {
+        if !should_continue {
             //closestContacts is full
             break
         }
