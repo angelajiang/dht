@@ -79,32 +79,58 @@ type FindNodeResult struct {
     Err error
 }
 
-/*func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
+func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     //check if we're the node in question
-    start_from_one := false //hacky way to know if we should fill the array from 0 or 1
-    for key, _ := range k.Data {
-        if key == req.NodeID {
-            start_from_one = true
-            res.Nodes[0].NodeID = k.NodeID
-            res.Nodes[0].IPAddr = k.Host.String()
-            res.Nodes[0].Port = k.Port
-        }
+    if req.NodeID == k.NodeID{
+        res.Nodes[0].NodeID = k.NodeID
+        res.Nodes[0].IPAddr = k.Host.String()
+        res.Nodes[0].Port = k.Port
+    }else{
+        //closestContacts = FindClosestContacts
+        //res.Nodes = ContactsToFoundNodes
     }
-    if start_from_one == true {
-    //loop through each contact in each bucket to calculate distance
-        for index, bucket := range k.Buckets {
-            for num, contact := range k.Buckets[index].Contacts {
-                //distance(x, y) = x ^ y                 
-                //there is an Xor function in id.go!
-                //XOR the distance between yourself and your contacts.
-                //find the .. 2 or 3 closest contacts?
-            }
-        }
-    }
-
+    res.MsgID = CopyID(req.MsgID)
     return nil
 }
-*/
+
+func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
+    closestContacts = make([]Contact, 0) //Need to make specific to alpha parameter
+    distance := k.NodeID.Xor(requestID)
+    //First 1 from MSB is index to bucket
+    indices := DistanceToOnes(distance)
+    for index := range indices{
+        //Add contacts from buckets[index] until closestContacts is full
+        should_continue := AddNodesFromBucket(k, index, requestID, closestContacts)
+        if should_continue {
+            break
+        }
+    }
+    return
+}
+
+func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []Contact)(IsFull bool){
+    //Sort contacts in bucket
+    //Add contacts from bucket in sorted order
+    //Terminate when no more contacts in bucket or IsFull(closestContacts)
+    //Return false if added all contacts in bucket
+    //Return true if no more contacts in bucket
+    return true
+}
+
+
+func DistanceToOnes(distance ID)(ones []int){
+    //Xor'ed result distance -> slice of bits in distance that are one from MSB->LSB 
+    ones = make([]int, 160)
+
+    return
+}
+    
+func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
+    //Takes a splice of contacts and transforms it into a splice of foundNodes
+    //Output can be stored in a FindNodeResult
+    foundNodes = make([]FoundNode, 0)
+    return
+}
 
 // FIND_VALUE
 type FindValueRequest struct {
