@@ -94,16 +94,19 @@ func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
 }
 
 func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
+    //Basically a wrapper to find closest contacts
     closestContacts = make([]Contact, 0) //Need to make specific to alpha parameter
     distance := k.NodeID.Xor(requestID)
-    //First 1 from MSB is index to bucket
+    //First 1 from MSB is index to closest bucket
     indices := DistanceToOnes(distance)
     for index := range indices{
         //Add contacts from buckets[index] until closestContacts is full
         should_continue := AddNodesFromBucket(k, index, requestID, closestContacts)
         if should_continue {
+            //closestContacts is full
             break
         }
+        //Otherwise, move on to next closest bucket
     }
     return
 }
@@ -120,6 +123,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
 
 func DistanceToOnes(distance ID)(ones []int){
     //Xor'ed result distance -> slice of bits in distance that are one from MSB->LSB 
+    //ex) 1011 -> [3, 1, 0]
     ones = make([]int, 160)
 
     return
