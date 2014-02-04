@@ -75,15 +75,18 @@ func CallStore(remote_contact *Contact, Key ID, Value []byte) error {
     //set up rpc dial and all that jazz 
     peer_str := HostPortToPeerStr(remote_contact.Host, remote_contact.Port)
     client, err := rpc.DialHTTP("tcp", peer_str)
-    fmt.Printf("Client in DoStore: %v\n", client)
     if err != nil {
         log.Fatal("DialHttp: ", err)
     }
 
+    hashed_key := HashKey(Key)
+    hashed_id, err := FromByteArray(hashed_key)
+
     //set up request struct
     request.Sender = *(remote_contact)
     request.MsgID = NewRandomID()
-    request.Key = Key
+//    request.Key = Key
+    request.Key = hashed_id
     request.Value = Value
 
     //make rpc call 
@@ -103,7 +106,6 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
         //maybe get rid of contact?
         log.Fatal("DialHttp: ", err)
     }
-    fmt.Printf("Client in DoFindValue: %v\n", client)
     //Create FindValueRequest
     hashed_key := HashKey(Key)
     hashed_id, err := FromByteArray(hashed_key)
@@ -111,8 +113,6 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
     req.Sender = k.KContact
     req.MsgID = NewRandomID()
     req.Key = hashed_id
-
-    fmt.Printf("req in DoFindValue: %v\n", req)
 
     //Call Kademlia.FindValue
     result := new(FindValueResult)
@@ -174,11 +174,11 @@ func HostPortToPeerStr(remote_host net.IP, port uint16) (peer_str string){
 }
 
 func HashKey(key ID) []byte {
-    fmt.Printf("size of key: %v\n", len(key))
+    //fmt.Printf("size of key: %v\n", len(key))
     h := sha1.New()
     h.Write(key[:])
     bs := h.Sum([]byte{})
-    fmt.Printf("bs is :%v\n", bs)
+    //fmt.Printf("bs is :%v\n", bs)
     return bs
 }
 

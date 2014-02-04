@@ -56,7 +56,6 @@ type StoreResult struct {
 func (k *Kademlia) Store(req StoreRequest, res *StoreResult) error {
     k.Data[req.Key] = req.Value
     res.MsgID = CopyID(req.MsgID)
-    fmt.Printf("I now have: %v\n", k.Data[req.Key]) 
     return nil
 }
 
@@ -127,6 +126,7 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     res.MsgID = CopyID(req.MsgID)
     if val,ok := k.Data[req.Key]; ok {
         res.Value = val
+
     }else{
         res.Value = nil
         //call find node
