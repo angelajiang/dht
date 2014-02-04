@@ -47,46 +47,11 @@ func main() {
 
     // Serve forever.
     go http.Serve(l, nil)
-    // Confirm our server is up with a PING request and then exit.
-    // Your code should loop forever, reading instructions from stdin and
-    // printing their results to stdout. See README.txt for more details.
-    client, err := rpc.DialHTTP("tcp", first_peer_str)
-    if err != nil {
-        log.Fatal("DialHTTP: ", err)
-    }
-    ping := new(kademlia.Ping)
-    ping.MsgID = kademlia.NewRandomID()
-    var pong kademlia.Pong
-    err = client.Call("Kademlia.Ping", ping, &pong)
-    if err != nil {
-        log.Fatal("Call: ", err)
-    }
 
-    log.Printf("ping msgID: %s\n", ping.MsgID.AsString())
-    log.Printf("pong msgID: %s\n", pong.MsgID.AsString())
+    //Testing
+    kademlia.TestPingFirstPeer(kadem, first_peer_str)
+    kademlia.TestBasicRPCs(kadem, first_peer_str)
 
-    var pong2 kademlia.Pong
-    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(first_peer_str)
-    pong2, err = kademlia.DoPing(listen_netip, peer_uint16)
-    log.Printf("pong msg from doping %v\n", pong2.MsgID.AsString())
-
-    //Making new contacts and calling Update
-    tmp_id := kadem.NodeID
-    tmp_ip := net.ParseIP("127.0.0.1")
-    tmp_port := port
-    tmp_contact := kademlia.Contact{tmp_id, tmp_ip, tmp_port}
-    //kademlia.Update(tmp_contact, &kadem.Buckets[0])
-
-    //Putting value into tmp_contact for testing DoFindValue
-    s := make([]byte, 5)
-    tmp_key := kademlia.NewRandomID()
-    tmp_data := s
-    fmt.Printf("tmpdata: %v\n", tmp_data)
-    kadem.Data[tmp_key] = tmp_data
-    res, _ := kademlia.DoFindValue(kadem, &tmp_contact, tmp_key)
-    fmt.Printf("DoFindValue response: %v\n",res)
-
-    
     /* looping forever, reading from stdin */
     for {
         bio := bufio.NewReader(os.Stdin)
@@ -110,7 +75,7 @@ func main() {
                 host_to_ping := cmdline_args[1]
                 if strings.Contains(host_to_ping, ":") {
                     listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
-                    pong_from_host, err = kademlia.DoPing(listen_netip, peer_uint16)
+                    pong_from_host, err = kademlia.CallPing(listen_netip, peer_uint16)
                     log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
                 } else {
                 }
