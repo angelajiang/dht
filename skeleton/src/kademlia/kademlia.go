@@ -7,11 +7,9 @@ package kademlia
 import (
     "net"
     "net/rpc"
-    "strconv"
-    "strings"
     "log"
     "fmt"
-    "crypto/sha1"
+    "errors"
 )
 
 const NUMBUCKETS int =  160
@@ -147,39 +145,45 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_key ID) (close_con
 
    return res.Nodes, nil
 }
-/*HELPERS*/
 
-func PeerStrToHostPort(listen_str string) (net.IP, uint16){
-    /*Parsing*/
-    input_arr := strings.Split(listen_str, ":")
-    host_str := input_arr[0]
-    port_str := input_arr[1]
-    //Check if localhost
-    if host_str == "localhost"{
-        host_str = "127.0.0.1"
+
+func Update(contact *Contact, bucket_addr *Bucket) error {
+    fmt.Printf("bucket len in Update is: %v\n", len(bucket_addr.Contacts))
+    bucket := *bucket_addr
+    in_bucket, index:= InBucket(contact, bucket)
+    is_full := IsFull(bucket)
+    switch {
+    case in_bucket:
+        /*Move contact to end of bucket's contact list*/
+        fmt.Printf("Case: in_bucket\n")
+        bucket.Contacts = append(bucket.Contacts[:index-1],bucket.Contacts[(index+1):]...)
+        bucket.Contacts = append(bucket.Contacts, *contact)
+    case !in_bucket && !is_full:
+        if len(bucket_addr.Contacts) == 0{
+            fmt.Printf("Case: !in_bucket, !is_full, empty\n")
+            bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
+        } else {
+            fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
+            pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+            fmt.Printf("%+v\n", pong)
+            if err != nil{
+                bucket_addr.Contacts = append(bucket_addr.Contacts[1:], *contact)
+            }
+            bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
+        }
+    case !in_bucket && is_full:
+        fmt.Printf("Case: !in_bucket and is_full\n")
+        /*Replace head of list if head doesn't respond. Otherwise, ignore*/
+        pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+        fmt.Printf("%+v\n", pong)
+        if err != nil{
+            //drop head append contact to end of list
+            bucket_addr.Contacts = append(bucket_addr.Contacts[1:], *contact)
+        } else {
+            //Move head to tail
+            bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
+        }
     }
-    listen_netip := net.ParseIP(host_str)
-    peer_uint64, _ := strconv.ParseUint(port_str, 10, 16)
-    peer_uint16 := uint16(peer_uint64)
-
-    return listen_netip, peer_uint16
+    return errors.New("function not implemented")
 }
-
-func HostPortToPeerStr(remote_host net.IP, port uint16) (peer_str string){
-    remote_host_str := remote_host.String()
-    port_uint64 := uint64(port)
-    port_str :=  strconv.FormatUint(port_uint64, 10)
-    peer_str = remote_host_str + ":" + port_str
-    return peer_str
-}
-
-func HashKey(key ID) []byte {
-    //fmt.Printf("size of key: %v\n", len(key))
-    h := sha1.New()
-    h.Write(key[:])
-    bs := h.Sum([]byte{})
-    //fmt.Printf("bs is :%v\n", bs)
-    return bs
-}
-
 
