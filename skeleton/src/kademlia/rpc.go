@@ -6,7 +6,6 @@ package kademlia
 import (
     "net"
     "fmt"
-    "math"
 )
 
 
