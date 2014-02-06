@@ -121,7 +121,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
     for _, contact := range k.Buckets[index].Contacts {
         //compare against distances of sorted contacts 
         for n, sorted_contact := range sorted_contacts {
-           if PrefixLength(contact.NodeID, k.NodeID) > PrefixLength(sorted_contact.NodeID, k.NodeID) {
+           if PrefixLength(contact.NodeID, requestID) > PrefixLength(sorted_contact.NodeID, requestID) {
                //PrefixLen returns number of consecutive zeros, the more zeros the closer we are, hence the ">"
                if n == 0 {
                    //If it's closer than the first contact in sorted_contacts:
