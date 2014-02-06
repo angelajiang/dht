@@ -131,18 +131,14 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
                    closestContacts = append(closestContacts, contact)
                    closestContacts = append(closestContacts, sorted_contacts[(n+1):]...)
                    //check if closestContacts is full
-                   if len(closestContacts) == 3 {
-                        IsFull = true
-                        return
-                   }
                } else {
                    //If it's closer than one of the other elements in sorted_contacts:
                    closestContacts = append(sorted_contacts[:(n-1)], contact, sorted_contacts[(n)])
                    //check again for length of closestContact
-                   if len(closestContacts) == 3 {
-                        IsFull = true
-                        return
-                   }
+               }
+               if len(closestContacts) == 3 {
+                   IsFull = true
+                   return
                }
            }
         }
