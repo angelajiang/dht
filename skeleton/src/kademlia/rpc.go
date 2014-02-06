@@ -6,6 +6,7 @@ package kademlia
 import (
     "net"
     "fmt"
+    "math"
 )
 
 
@@ -112,7 +113,6 @@ func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
 }
 
 func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []Contact)(IsFull bool){
-    //Sort contacts in bucket
     IsFull = false
     //make a sorted contacts slice
     sorted_contacts := make([]Contact, 3)
@@ -122,7 +122,8 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
     for _, contact := range k.Buckets[index].Contacts {
         //compare against distances of sorted contacts 
         for n, sorted_contact := range sorted_contacts {
-           if PrefixDistance(contact.NodeID, k.NodeID) < PrefixDistance(sorted_contact.NodeID, k.NodeID) {
+           if PrefixLength(contact.NodeID, k.NodeID) > PrefixLength(sorted_contact.NodeID, k.NodeID) {
+               //PrefixLen returns number of consecutive zeros, the more zeros the closer we are, hence the ">"
                if n == 0 {
                    //If it's closer than the first contact in sorted_contacts:
                    //Prepend to list (must do this in a stupid way because
@@ -136,8 +137,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
                         return
                    }
                } else {
-                   //If it's closer than one of the other elements in
-                   //sorted_contacts:
+                   //If it's closer than one of the other elements in sorted_contacts:
                    closestContacts = append(sorted_contacts[:(n-1)], contact, sorted_contacts[(n)])
                    //check again for length of closestContact
                    if len(closestContacts) == 3 {
@@ -148,8 +148,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
            }
         }
     }
-    //we check here in case we've looped through all the contacts and the loop
-    //terminated
+    //we check here in case we've looped through all the contacts and the loop terminated
     if len(closestContacts) == 3 {
         IsFull = true
     }
@@ -157,7 +156,11 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
 }
 
 
-func PrefixDistance(id ID, other ID) (dist int) {
+func PrefixLength(id ID, other ID) (dist int) {
+    dist = id.PrefixLen() - other.PrefixLen()
+    if dist < 0 {
+        dist = dist * -1
+    }
     return
 }
 func DistanceToOnes(distance ID)(ones []int){
