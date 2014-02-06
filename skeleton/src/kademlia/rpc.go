@@ -123,7 +123,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []
 
 func DistanceToOnes(distance ID)(ones []int){
     //Xor'ed result distance -> slice of bits in distance that are one from MSB->LSB 
-    //ex) 1011 -> [3, 1, 0]
+    //ex) 1011 -> [1, 3, 4]
     ones = make([]int, 160)
 
     return
