@@ -66,8 +66,19 @@ func TestStoreAndFindValue(k *Kademlia){
 
 }
 
+func TestGetSetBits(){
+	id1 := NewRandomID()
+	id2 := NewRandomID()
+	distance := id1.Xor(id2) 
+	fmt.Printf("Distance: %v\n", distance)
+	indices := GetSetBits(distance)
+	fmt.Printf("Indices: %v\n", indices)
+
+}
+
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	TestUpdate(k)
 	TestStoreAndFindValue(k)
+	TestGetSetBits()
 
 }

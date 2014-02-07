@@ -98,7 +98,7 @@ func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
     closestContacts = make([]Contact, 0) //Need to make specific to alpha parameter
     distance := k.NodeID.Xor(requestID)
     //First 1 from MSB is index to closest bucket
-    indices := DistanceToOnes(distance)
+    indices := GetSetBits(distance)
     for index := range indices {
         //Add contacts from buckets[index] until closestContacts is full
         should_continue := AddNodesFromBucket(k, index, requestID, closestContacts)
@@ -158,13 +158,7 @@ func PrefixLength(id ID, other ID) (dist int) {
     }
     return
 }
-func DistanceToOnes(distance ID)(ones []int){
-    //Xor'ed result distance -> slice of bits in distance that are one from MSB->LSB 
-    //ex) 1011 -> [1, 3, 4]
-    ones = make([]int, 160)
 
-    return
-}
 
 func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
     //Takes a splice of contacts and transforms it into a splice of foundNodes

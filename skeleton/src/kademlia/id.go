@@ -60,6 +60,21 @@ func (id ID) PrefixLen() int {
     return IDBytes * 8
 }
 
+func GetSetBits(distance ID)(ones []int){
+    //Xor'ed result distance -> slice of bits in distance that are one from MSB->LSB 
+    //Returns indices of set bits in distance
+    //Backwards bit traversal for compatibility with PrefixLen
+    //ex) 1011 0110-> [1, 3, 4, 6, 7]
+    indices := make([]int, 0)
+    for i:= IDBytes-1; i >= 0; i-- {
+        for j := 7; j >= 0; j-- {
+            if (distance[i] >> uint8(j)) & 0x1 != 0 {
+                indices = append(indices, (8*IDBytes) - (8*i+j))
+            }
+        }
+    }
+    return indices
+}
 
 // Generate a new ID from nothing.
 func NewRandomID() (ret ID) {
