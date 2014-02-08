@@ -162,7 +162,6 @@ func PrefixLength(id ID, other ID) (dist int) {
 func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
     //Takes a splice of contacts and transforms it into a splice of foundNodes
     //Output can be stored in a FindNodeResult
-    //TODO: test after FindClosestContacts is finished
     foundNodes = make([]FoundNode, 0)
     for _, contact := range contacts{
         f := new(FoundNode)

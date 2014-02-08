@@ -77,18 +77,32 @@ func TestGetSetBits(){
 }
 
 func TestContactsToFoundNodes(k *Kademlia){
-    tmp_id := NewRandomID()
-    tmp_ip := net.ParseIP("127.0.0.1")
-    tmp_port := k.Port
-    contact1 := Contact{tmp_id, tmp_ip, tmp_port}
-    contact2 := Contact{tmp_id, tmp_ip, tmp_port}
-    closestContacts := make([]Contact, 0)
-    closestContacts = append(closestContacts, contact1)
-    closestContacts = append(closestContacts, contact2)
+	closestContacts := make([]Contact, 0)
+	FillTestContactSlice(&closestContacts)
     fmt.Printf("closestContacts: %v\n", closestContacts)
     foundNodes := ContactsToFoundNodes(closestContacts)
     fmt.Printf("foundNodes: %v\n", foundNodes)
 }
+
+func FillTestContactSlice(contacts *[]Contact){
+    tmp_id := NewRandomID()
+    tmp_ip := net.ParseIP("127.0.0.1")
+    tmp_port := uint16(uint32(2222))
+    contact1 := Contact{tmp_id, tmp_ip, tmp_port}
+    contact2 := Contact{tmp_id, tmp_ip, tmp_port}
+    *contacts = append(*contacts, contact1)
+    *contacts = append(*contacts, contact2)
+}
+
+/*
+func TestSortByDistance(request_id ID){
+	type ByDistance []Contact
+	func (a ByDistance) Len() int           { return len(a) }
+	func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+	func (a ByDistance) Less(i, j int) bool { 
+		return PrefixLength(a[i].NodeID, requestID) > PrefixLength(a[j].NodeID, requestID)}
+}
+*/
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	TestUpdate(k)
