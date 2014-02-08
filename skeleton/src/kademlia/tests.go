@@ -76,9 +76,24 @@ func TestGetSetBits(){
 
 }
 
+func TestContactsToFoundNodes(k *Kademlia){
+    tmp_id := NewRandomID()
+    tmp_ip := net.ParseIP("127.0.0.1")
+    tmp_port := k.Port
+    contact1 := Contact{tmp_id, tmp_ip, tmp_port}
+    contact2 := Contact{tmp_id, tmp_ip, tmp_port}
+    closestContacts := make([]Contact, 0)
+    closestContacts = append(closestContacts, contact1)
+    closestContacts = append(closestContacts, contact2)
+    fmt.Printf("closestContacts: %v\n", closestContacts)
+    foundNodes := ContactsToFoundNodes(closestContacts)
+    fmt.Printf("foundNodes: %v\n", foundNodes)
+}
+
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	TestUpdate(k)
 	TestStoreAndFindValue(k)
 	TestGetSetBits()
+	TestContactsToFoundNodes(k)
 
 }

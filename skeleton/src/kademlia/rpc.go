@@ -87,7 +87,7 @@ func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
         res.Nodes[0].Port = k.Port
     }else{
         //closestContacts = FindClosestContacts
-        //res.Nodes = ContactsToFoundNodes
+        //res.Nodes = ContactsToFoundNodes(closestContacts)
     }
     res.MsgID = CopyID(req.MsgID)
     return nil
@@ -159,11 +159,18 @@ func PrefixLength(id ID, other ID) (dist int) {
     return
 }
 
-
 func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
     //Takes a splice of contacts and transforms it into a splice of foundNodes
     //Output can be stored in a FindNodeResult
+    //TODO: test after FindClosestContacts is finished
     foundNodes = make([]FoundNode, 0)
+    for _, contact := range contacts{
+        f := new(FoundNode)
+        f.NodeID = contact.NodeID
+        f.Port = contact.Port
+        f.IPAddr = contact.Host.String()
+        foundNodes = append(foundNodes, *f)
+    }
     return
 }
 
@@ -194,4 +201,5 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     }
     return nil
 }
+
 
