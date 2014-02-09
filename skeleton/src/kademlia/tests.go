@@ -110,9 +110,9 @@ func TestFindClosestContacts(k *Kademlia){
 	fmt.Println("\nTESTING: TestFindClosestContacts\n")
 	TestUpdate(k, 100)		
 	requestID := NewRandomID()
-	FindClosestContacts(k, requestID)
-	//closestContacts := FindClosestContacts(k, requestID)
-	//fmt.Printf("ClosestContacts: %v\n", closestContacts)
+	//FindClosestContacts(k, requestID)
+	closestContacts := FindClosestContacts(k, requestID)
+	fmt.Printf("ClosestContacts: %v\n", closestContacts)
 }
 
 
