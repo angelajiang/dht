@@ -87,3 +87,19 @@ func NewRandomContact()(*Contact){
     nodeid := NewRandomID()
     return &Contact{nodeid, ip, port}
 }
+
+func GetBucketIndex(distance ID)(index int){
+	/*Given distance, returns first set bit counting from MSB
+	 	ex) 0011 0101 -> 3	*/
+	index = 0
+    for i:= IDBytes-1; i >= 0; i-- {
+        for j := 7; j >= 0; j-- {
+            if (distance[i] >> uint8(j)) & 0x1 != 0 {
+                index = (8*IDBytes) - (8*i+j)
+                return
+            }
+        }
+    }
+	return 
+}
+

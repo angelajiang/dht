@@ -147,10 +147,15 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_key ID) (close_con
 }
 
 
-func Update(contact *Contact, bucket_addr *Bucket) error {
-    fmt.Printf("bucket len in Update is: %v\n", len(bucket_addr.Contacts))
+func Update(k *Kademlia, contact *Contact) error {
+    //Choose correct bucket to put contact
+    distance := k.NodeID.Xor(contact.NodeID)
+    bucket_index := GetBucketIndex(distance)
+    bucket_addr := &k.Buckets[bucket_index]
+
     bucket := *bucket_addr
-    in_bucket, index:= InBucket(contact, bucket)
+    fmt.Printf("Bucket %v before update: %v\n", bucket_index, k.Buckets[bucket_index])
+    in_bucket, index:= InBucket(contact, *bucket_addr)
     is_full := IsFull(bucket)
     switch {
     case in_bucket:
@@ -184,6 +189,7 @@ func Update(contact *Contact, bucket_addr *Bucket) error {
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
     }
+    fmt.Printf("After: ", bucket_index, k.Buckets[bucket_index])
     return errors.New("function not implemented")
 }
 

@@ -30,7 +30,7 @@ func TestUpdate(k *Kademlia){
     //Making new contacts and calling Update
 	fmt.Printf("\nTESTING: Update\n")
 	contact := NewRandomContact()
-    Update(contact, &k.Buckets[0])
+    Update(k, contact)
 }
 
 func TestStoreAndFindValue(k *Kademlia){
@@ -109,6 +109,7 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
-	TestSortByDistance()
+	//TestSortByDistance()
+	fmt.Printf("\n\n")
 
 }
