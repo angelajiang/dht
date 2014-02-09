@@ -7,7 +7,18 @@ import (
     "strconv"
     "strings"
     "crypto/sha1"
+    "math/rand"
+    "time"
 )
+/*
+type ByDistance []Contact
+
+func (a ByDistance, dest NodeID) Len() int           { return len(a) }
+func (a ByDistance, dest NodeID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByDistance, dest NodeID) Less(i, j int) bool { 
+	return PrefixLength(a[i].NodeID, dest) > PrefixLength(a[j].NodeID, dest)}
+	*/
+
 
 func PeerStrToHostPort(listen_str string) (net.IP, uint16){
     /*Parsing*/
@@ -61,4 +72,16 @@ func IsFull(bucket Bucket) bool {
         return true
     }
     return false
+}
+
+func random(min, max int) int {
+    rand.Seed(time.Now().Unix())
+    return rand.Intn(max - min) + min
+}
+
+func NewRandomContact()(Contact){
+	port := uint16(random(4000,5000))
+    ip := net.ParseIP("127.0.0.1")
+    nodeid := NewRandomID()
+    return Contact{nodeid, ip, port}
 }
