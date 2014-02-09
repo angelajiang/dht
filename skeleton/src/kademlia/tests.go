@@ -3,8 +3,8 @@ package kademlia
 import (
 	"log"
 	"net/rpc"
-	"net"
 	"fmt"
+	"sort"
 
 )
 
@@ -29,11 +29,8 @@ func TestPingFirstPeer(k *Kademlia, first_peer_str string){
 func TestUpdate(k *Kademlia){
     //Making new contacts and calling Update
 	fmt.Printf("\nTESTING: Update\n")
-    tmp_id := NewRandomID()
-    tmp_ip := net.ParseIP("127.0.0.1")
-    tmp_port := k.Port
-    contact1 := Contact{tmp_id, tmp_ip, tmp_port}
-    Update(&contact1, &k.Buckets[0])
+	contact := NewRandomContact()
+    Update(contact, &k.Buckets[0])
 }
 
 func TestStoreAndFindValue(k *Kademlia){
@@ -67,6 +64,7 @@ func TestStoreAndFindValue(k *Kademlia){
 }
 
 func TestGetSetBits(){
+	fmt.Printf("\nTESTING: GetSetBits\n")
 	id1 := NewRandomID()
 	id2 := NewRandomID()
 	distance := id1.Xor(id2) 
@@ -77,35 +75,40 @@ func TestGetSetBits(){
 }
 
 func TestContactsToFoundNodes(k *Kademlia){
+	fmt.Printf("\nTESTING: ContactsToFoundNodes\n")
 	closestContacts := make([]Contact, 0)
-	FillTestContactSlice(&closestContacts)
+	FillTestContactSlice(&closestContacts, 3)
     fmt.Printf("closestContacts: %v\n", closestContacts)
     foundNodes := ContactsToFoundNodes(closestContacts)
     fmt.Printf("foundNodes: %v\n", foundNodes)
 }
 
-func FillTestContactSlice(contacts *[]Contact){
-    contact1 := NewRandomContact()
-    contact2 := NewRandomContact()
-    *contacts = append(*contacts, contact1)
-    *contacts = append(*contacts, contact2)
+func FillTestContactSlice(contacts *[]Contact, n int){
+	for i := 0; i < n; i++ {
+		c := NewRandomContact()
+	    *contacts = append(*contacts, *c)
+	}
 }
-/*
-func TestContactsToFoundNodes(k *Kademlia){
-	fmt.Println("TestContactsToFoundNodes:\n")
+
+func TestSortByDistance(){
+	fmt.Println("\nTESTING: TestSortByDistance\n")
 	contacts := make([]Contact, 0)
-	FillTestContactSlice(&contacts)
-    fmt.Printf("ContactsToSort: %v\n", contacts)
+	FillTestContactSlice(&contacts, 3)
+    fmt.Printf("ContactsToSort: %v\n\n", contacts)
+    ds := new(DistanceSorter)
+    ds.Contacts = contacts
+    dest_id := NewRandomID()
+    ds.DestID = dest_id
+    sort.Sort(ds)
+    fmt.Printf("Sorted: %v\n\n", ds.Contacts)
 }
-*/
-
-
 
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	TestUpdate(k)
-	TestStoreAndFindValue(k)
-	TestGetSetBits()
-	TestContactsToFoundNodes(k)
+	//TestStoreAndFindValue(k)
+	//TestGetSetBits()
+	//TestContactsToFoundNodes(k)
+	TestSortByDistance()
 
 }

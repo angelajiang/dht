@@ -10,14 +10,16 @@ import (
     "math/rand"
     "time"
 )
-/*
-type ByDistance []Contact
 
-func (a ByDistance, dest NodeID) Len() int           { return len(a) }
-func (a ByDistance, dest NodeID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByDistance, dest NodeID) Less(i, j int) bool { 
-	return PrefixLength(a[i].NodeID, dest) > PrefixLength(a[j].NodeID, dest)}
-	*/
+type DistanceSorter struct {
+	DestID ID
+	Contacts []Contact
+}
+
+func (ds *DistanceSorter) Len() int           { return len(ds.Contacts) }
+func (ds *DistanceSorter) Swap(i, j int)      { ds.Contacts[i], ds.Contacts[j] = ds.Contacts[j], ds.Contacts[i] }
+func (ds *DistanceSorter) Less(i, j int) bool { 
+	return PrefixLength(ds.Contacts[i].NodeID, ds.DestID) > PrefixLength(ds.Contacts[j].NodeID, ds.DestID)}
 
 
 func PeerStrToHostPort(listen_str string) (net.IP, uint16){
@@ -75,13 +77,13 @@ func IsFull(bucket Bucket) bool {
 }
 
 func random(min, max int) int {
-    rand.Seed(time.Now().Unix())
+    rand.Seed(time.Now().UnixNano())
     return rand.Intn(max - min) + min
 }
 
-func NewRandomContact()(Contact){
+func NewRandomContact()(*Contact){
 	port := uint16(random(4000,5000))
     ip := net.ParseIP("127.0.0.1")
     nodeid := NewRandomID()
-    return Contact{nodeid, ip, port}
+    return &Contact{nodeid, ip, port}
 }
