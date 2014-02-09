@@ -4,6 +4,7 @@ package kademlia
 import (
     "encoding/hex"
     "math/rand"
+    "time"
 )
 
 
@@ -78,6 +79,7 @@ func GetSetBits(distance ID)(ones []int){
 
 // Generate a new ID from nothing.
 func NewRandomID() (ret ID) {
+    rand.Seed(time.Now().UnixNano())
     for i := 0; i < IDBytes; i++ {
         ret[i] = uint8(rand.Intn(256))
     }

@@ -26,11 +26,14 @@ func TestPingFirstPeer(k *Kademlia, first_peer_str string){
     log.Printf("pong msgID: %s\n", pong.MsgID.AsString())
 }
 
-func TestUpdate(k *Kademlia){
+func TestUpdate(k *Kademlia, n int){
     //Making new contacts and calling Update
 	fmt.Printf("\nTESTING: Update\n")
-	contact := NewRandomContact()
-    Update(k, contact)
+	for i := 0; i < n; i++ {
+		c := NewRandomContact()
+	    Update(k, c)
+	}
+	fmt.Printf("After adding %v contacts:\n%v\n", n, k.Buckets)
 }
 
 func TestStoreAndFindValue(k *Kademlia){
@@ -103,13 +106,23 @@ func TestSortByDistance(){
     fmt.Printf("Sorted: %v\n\n", ds.Contacts)
 }
 
+func TestFindClosestContacts(k *Kademlia){
+	fmt.Println("\nTESTING: TestFindClosestContacts\n")
+	TestUpdate(k, 100)		
+	requestID := NewRandomID()
+	FindClosestContacts(k, requestID)
+	//closestContacts := FindClosestContacts(k, requestID)
+	//fmt.Printf("ClosestContacts: %v\n", closestContacts)
+}
+
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
-	TestUpdate(k)
+	//TestUpdate(k, 4)
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
 	//TestSortByDistance()
+	TestFindClosestContacts(k)
 	fmt.Printf("\n\n")
 
 }

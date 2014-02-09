@@ -101,10 +101,10 @@ func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
     indices := GetSetBits(distance)
     for index := range indices {
         //Add contacts from buckets[index] until closestContacts is full
-        should_continue := AddNodesFromBucket(k, index, requestID, closestContacts)
-        if !should_continue {
+        is_full := AddNodesFromBucket(k, index, requestID, closestContacts)
+        if is_full {
             //closestContacts is full
-            break
+            return closestContacts
         }
         //Otherwise, move on to next closest bucket
     }
@@ -114,8 +114,12 @@ func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
 func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContacts []Contact)(IsFull bool){
     IsFull = false
     //make a sorted contacts slice
-    sorted_contacts := make([]Contact, 3)
+    sorted_contacts := make([]Contact, 0)
     //add an inital contact in there
+    if (len(k.Buckets[index].Contacts) == 0){
+        //No contacts in this bucket
+        return
+    }
     sorted_contacts = append(sorted_contacts, k.Buckets[index].Contacts[0])
     //loop through every contact in the bucket
     for _, contact := range k.Buckets[index].Contacts {

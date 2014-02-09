@@ -13,7 +13,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 1
+const NUMCONTACTS int = 100
 const VALUESIZE int = 160
 
 type Kademlia struct {
@@ -154,7 +154,7 @@ func Update(k *Kademlia, contact *Contact) error {
     bucket_addr := &k.Buckets[bucket_index]
 
     bucket := *bucket_addr
-    fmt.Printf("Bucket %v before update: %v\n", bucket_index, k.Buckets[bucket_index])
+    fmt.Printf("Bucket %v length before update: %v\n", bucket_index, len(k.Buckets[bucket_index].Contacts))
     in_bucket, index:= InBucket(contact, *bucket_addr)
     is_full := IsFull(bucket)
     switch {
@@ -169,7 +169,7 @@ func Update(k *Kademlia, contact *Contact) error {
             bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
         } else {
             fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
-            pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+            pong, err := CallPing(bucket_addr.Contacts[0].Host, k.Port)//bucket_addr.Contacts[0].Port)
             fmt.Printf("%+v\n", pong)
             if err != nil{
                 bucket_addr.Contacts = append(bucket_addr.Contacts[1:], *contact)
@@ -179,7 +179,7 @@ func Update(k *Kademlia, contact *Contact) error {
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        pong, err := CallPing(bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
+        pong, err := CallPing(bucket_addr.Contacts[0].Host, k.Port)//bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
         if err != nil{
             //drop head append contact to end of list
@@ -189,7 +189,7 @@ func Update(k *Kademlia, contact *Contact) error {
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
     }
-    fmt.Printf("After: ", bucket_index, k.Buckets[bucket_index])
+    fmt.Printf("After: %v\n", len(k.Buckets[bucket_index].Contacts))
     return errors.New("function not implemented")
 }
 
