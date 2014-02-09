@@ -15,6 +15,7 @@ import (
 const NUMBUCKETS int =  160
 const NUMCONTACTS int = 100
 const VALUESIZE int = 160
+const ALPHA int = 3
 
 type Kademlia struct {
     NodeID ID
