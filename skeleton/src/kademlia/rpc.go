@@ -86,8 +86,8 @@ func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
         res.Nodes[0].IPAddr = k.Host.String()
         res.Nodes[0].Port = k.Port
     }else{
-        //closestContacts = FindClosestContacts
-        //res.Nodes = ContactsToFoundNodes(closestContacts)
+        closestContacts := FindClosestContacts(k, req.NodeID)
+        res.Nodes = ContactsToFoundNodes(closestContacts)
     }
     res.MsgID = CopyID(req.MsgID)
     return nil
@@ -115,7 +115,8 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
 
     }else{
         res.Value = nil
-        //call find node
+        closestContacts := FindClosestContacts(k, req.Key)
+        res.Nodes = ContactsToFoundNodes(closestContacts)
     }
     return nil
 }

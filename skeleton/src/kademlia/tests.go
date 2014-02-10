@@ -50,6 +50,7 @@ func TestStoreAndFindValue(k *Kademlia){
     	log.Fatal("CallFindValue: ", err)
     }
     fmt.Printf("CallFindValue before store: %v\n",res.Value)
+    fmt.Printf("Nodes before store: %v\n",res.Nodes)
 
     //Call store
     err = CallStore(&dest_contact, data_key, tmp_data)
@@ -63,6 +64,7 @@ func TestStoreAndFindValue(k *Kademlia){
     	log.Fatal("CallFindValue: ", err)
     }
     fmt.Printf("CallFindValue after store: %v\n",res.Value)
+    fmt.Printf("Nodes after store: %v\n",res.Nodes)
 
 }
 
@@ -115,14 +117,28 @@ func TestFindClosestContacts(k *Kademlia){
 	fmt.Printf("ClosestContacts: %v\n", closestContacts)
 }
 
+func TestFindNode(k *Kademlia){
+
+	fmt.Println("\nTESTING: TestFindNode\n")
+	c := NewRandomContact()
+	c.Port = 7777
+	closestContacts, _ := CallFindNode(k, c, NewRandomID())
+	fmt.Printf("ClosestContacts: %v\n", closestContacts)
+
+
+
+
+}
+
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
-	//TestUpdate(k, 4)
+	TestUpdate(k, 100)
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
 	//TestSortByDistance()
-	TestFindClosestContacts(k)
+	//TestFindClosestContacts(k)
+	TestFindNode(k)
 	fmt.Printf("\n\n")
 
 }

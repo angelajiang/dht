@@ -123,7 +123,7 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
     return result, nil
 }
 
-func CallFindNode(k *Kademlia, remoteContact *Contact, search_key ID) (close_contacts []FoundNode, err error){
+func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_contacts []FoundNode, err error){
    //set up client 
     peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
     client, err := rpc.DialHTTP("tcp", peer_str)
@@ -138,7 +138,7 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_key ID) (close_con
     req.Sender.Host = k.Host
     req.Sender.Port = k.Port
     req.MsgID = NewRandomID()
-    req.NodeID = search_key
+    req.NodeID = search_id
     err = client.Call("Kademlia.FindNode", req, &res) 
     if err != nil {
           log.Fatal("Call FindNode: ", err)
