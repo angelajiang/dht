@@ -45,6 +45,19 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     return kptr
 }
 
+func FindContactLocally(k *Kademlia, contact_id ID) error {
+    dist := k.NodeID.Xor(contact_id)
+    bucket_index := GetBucketIndex(dist) 
+    for _, contact := range k.Buckets[bucket_index].Contacts {
+        if contact.NodeID == contact_id {
+            fmt.Printf("%v  %v\n", contact.Host, contact.Port)
+            break
+        }
+    }
+    fmt.Printf("ERR\n")
+    return nil
+}
+
 func FindValueLocally(k *Kademlia, Key ID) error {
     //1. Hash key
     hashed_key := HashKey(Key)

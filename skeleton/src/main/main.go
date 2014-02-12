@@ -90,6 +90,15 @@ func main() {
                 } else {
                     kademlia.FindValueLocally(kadem, key_id)
                 }
+            case "get_contact":
+                id_array := []byte(cmdline_args[1])
+                id, err := kademlia.FromByteArray(id_array)
+                if err != nil {
+                    fmt.Printf("error converting from byte array to ID\n")
+                } else {
+                    kademlia.FindContactLocally(kadem, id)
+                }
+            case "store":
         }
     }
 }
