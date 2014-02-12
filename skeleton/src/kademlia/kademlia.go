@@ -45,6 +45,23 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     return kptr
 }
 
+func FindValueLocally(k *Kademlia, Key ID) error {
+    //1. Hash key
+    hashed_key := HashKey(Key)
+    hashed_id, err := FromByteArray(hashed_key)
+    if err != nil {
+        fmt.Printf("error hashing key\n")
+    }
+    //2. Find data corresponding to hashed key
+    Val := k.Data[hashed_id]
+    if Val == nil {
+        fmt.Printf("ERR")
+    } else {
+        fmt.Printf("Val: %v\n", Val)
+    }
+    return nil
+}
+
 func CallPing(remote_host net.IP, port uint16) (Pong, error){
     /* DoPing should probably take a Kademlia object here */
     //TODO: run the Update function?

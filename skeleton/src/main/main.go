@@ -83,7 +83,13 @@ func main() {
                 fmt.Printf("%v\n", kadem.NodeID)
             case "local_find_value":
                 fmt.Printf("local_find_value")
-
+                key_array := []byte(cmdline_args[1])
+                key_id, err := kademlia.FromByteArray(key_array)
+                if err != nil {
+                    fmt.Printf("error converting from byte array to ID\n")
+                } else {
+                    kademlia.FindValueLocally(kadem, key_id)
+                }
         }
     }
 }

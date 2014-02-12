@@ -39,7 +39,7 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContactsPtr
     sorted_contacts = ds.Contacts       //Holds sorted contacts of bucket
     closestContacts := *closestContactsPtr
     for _, contact := range sorted_contacts {
-    	//Add contact from sorted list to closestContacts until full
+	//Add contact from sorted list to closestContacts until full
         *closestContactsPtr = append(closestContacts, contact)
         if len(closestContacts) == ALPHA {
             IsFull = true

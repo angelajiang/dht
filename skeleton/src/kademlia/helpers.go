@@ -16,10 +16,17 @@ type DistanceSorter struct {
 	Contacts []Contact
 }
 
-func (ds *DistanceSorter) Len() int           { return len(ds.Contacts) }
-func (ds *DistanceSorter) Swap(i, j int)      { ds.Contacts[i], ds.Contacts[j] = ds.Contacts[j], ds.Contacts[i] }
-func (ds *DistanceSorter) Less(i, j int) bool { 
-	return PrefixLength(ds.Contacts[i].NodeID, ds.DestID) > PrefixLength(ds.Contacts[j].NodeID, ds.DestID)}
+func (ds *DistanceSorter) Len() int {
+    return len(ds.Contacts)
+}
+
+func (ds *DistanceSorter) Swap(i, j int) {
+    ds.Contacts[i], ds.Contacts[j] = ds.Contacts[j], ds.Contacts[i]
+}
+
+func (ds *DistanceSorter) Less(i, j int) bool {
+	return PrefixLength(ds.Contacts[i].NodeID, ds.DestID) > PrefixLength(ds.Contacts[j].NodeID, ds.DestID)
+}
 
 
 func PeerStrToHostPort(listen_str string) (net.IP, uint16){
