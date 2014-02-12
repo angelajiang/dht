@@ -121,4 +121,11 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     return nil
 }
 
-
+func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) error {
+    //1. FindClosestContacts -> this returns 3 closest nodes.
+    //2. Make a shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
+    //3. Send parallel FindNode RPC calls to contacts in shortlist, if contact responds: mark it as "active"
+    //4. Update Shortlist: Using responses from FindNode calls: update shortlist, closestNode
+    //5. Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
+    return nil;
+}
