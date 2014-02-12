@@ -30,7 +30,7 @@ func main() {
         log.Fatal("Must be invoked with exactly two arguments!\n")
     }
     listen_str := args[0]
-    first_peer_str := args[1]
+    //first_peer_str := args[1]
 
     fmt.Printf("kademlia starting up!\n")
     host, port := kademlia.PeerStrToHostPort(listen_str)
@@ -49,8 +49,8 @@ func main() {
     go http.Serve(l, nil)
 
     //Testing
-    kademlia.TestPingFirstPeer(kadem, first_peer_str)
-    kademlia.TestBasicRPCs(kadem, first_peer_str)
+    //kademlia.TestPingFirstPeer(kadem, first_peer_str)
+    //kademlia.TestBasicRPCs(kadem, first_peer_str)
 
     /* looping forever, reading from stdin */
     for {
@@ -80,7 +80,7 @@ func main() {
                 } else {
                 }
             case "whoami":
-                fmt.Printf("whoami")
+                fmt.Printf("%v\n", kadem.NodeID)
             case "local_find_value":
                 fmt.Printf("local_find_value")
 
