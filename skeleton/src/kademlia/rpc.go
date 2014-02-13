@@ -6,6 +6,7 @@ package kademlia
 import (
     "net"
     "fmt"
+    "sort"
 )
 
 
@@ -81,11 +82,11 @@ type FindNodeResult struct {
 
 func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     //check if we're the node in question
-    if req.NodeID == k.NodeID{
+    if req.NodeID == k.NodeID {
         res.Nodes[0].NodeID = k.NodeID
         res.Nodes[0].IPAddr = k.Host.String()
         res.Nodes[0].Port = k.Port
-    }else{
+    } else {
         closestContacts := FindClosestContacts(k, req.NodeID)
         res.Nodes = ContactsToFoundNodes(closestContacts)
     }
@@ -110,10 +111,10 @@ type FindValueResult struct {
 
 func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     res.MsgID = CopyID(req.MsgID)
-    if val,ok := k.Data[req.Key]; ok {
+    if val, ok := k.Data[req.Key]; ok {
         res.Value = val
 
-    }else{
+    } else {
         res.Value = nil
         closestContacts := FindClosestContacts(k, req.Key)
         res.Nodes = ContactsToFoundNodes(closestContacts)
@@ -123,7 +124,15 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
 
 func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) error {
     //1. FindClosestContacts -> this returns 3 closest nodes.
+    closestContacts := FindClosestContacts(k, req.NodeID)
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
+    ds := new(DistanceSorter)
+    ds.Contacts = closestContacts
+    ds.DestID = k.NodeID
+    sort.Sort(ds)
+    shortlist := ds.Contacts
+    closestNode := shortlist[0]
+
     //3. NodesToRPC function that takes a shortlist and returns up to alpha
     //nodes that we need to contact (checks if node is marked active doesn't add it to list)
     //4. Send parallel FindNode RPC calls to contacts returned from NodesToRPC. *** CHANNELS GO HERE
