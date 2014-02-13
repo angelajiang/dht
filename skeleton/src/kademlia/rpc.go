@@ -5,10 +5,8 @@ package kademlia
 
 import (
     "net"
-    //"net/rpc"
     "fmt"
     "sort"
-    //"log"
     "time"
 )
 
@@ -135,6 +133,7 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     sort.Sort(ds)
     shortlist := ds.Contacts
     closestNode := shortlist[0]
+    node_state := make(map[ID]string)
 
     //3. NodesToRPC function that takes a shortlist and returns up to alpha
     //nodes that we need to contact (checks if node is marked active doesn't add it to list)
@@ -151,46 +150,61 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     response1 := false
     response2 := false
     response3 := false
+  
     for {
         select {
         case res1 := <- rpc1:
             response1 = true
             //mark contact1 as active
+            node_state[shortlist[0].NodeID] = "active"
+            //Check if we need to make RPC calls to any of the contacts returned in the channel
+            contacts_to_rpc := NodesToRPC(node_state, res1)
             //Update shortlist
             //Update closestNode
             //check for exit conditions
         case res2 := <- rpc2:
             response2 = true
             //mark contact2 as active
+            node_state[shortlist[1].NodeID] = "active"
+            //Check if we need to make RPC calls to any of the contacts returned in the channel
+            contacts_to_rpc := NodesToRPC(node_state, res2)
             //Update shortlist
             //Update closestNode
             //check for exit conditions
         case res3 := <- rpc3:
             response3 = true
             //mark contact3 as active
+            node_state[shortlist[2].NodeID] = "active"
+            //Check if we need to make RPC calls to any of the contacts returned in the channel
+            contacts_to_rpc := NodesToRPC(node_state, res3)
+            
             //Update shortlist 
             //Update closestNode
             //check for exit conditions
         case <- time.After(10 * 1e9): //timeout after 10 seconds
             if !response1 {
                 //mark contact1 as inactive
+                node_state[shortlist[0].NodeID] = "inactive"
                 //remove it from shortlist
                 //check for exit conditions
             }
             if !response2 {
                 //mark contact2 as inactive
+                node_state[shortlist[1].NodeID] = "inactive"
                 //remove it from shortlist
                 //check for exit conditions
             }
             if !response3 {
                 //mark contact3 as inactive
+                node_state[shortlist[2].NodeID] = "inactive"
                 //remove it from shortlist
                 //check for exit conditions
             }
         }
-    
+        
         //Make new RPC calls
     }
+
 /*
 Rula wrote this stuff:  
 for {
@@ -212,6 +226,12 @@ select {
     //7. Call General Update Function That We Haven't Done Before
     //8. Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
     return nil;
+}
+
+func NodesToRPC(node_state map[ID]string, nodes []Contact)(nodes_to_call_rpc_on []Contact) {
+//Takes a map of the "active/inactive" contacts and a list of contacts
+//returns a list of the contacts we didn't query before that we should make RPC calls to
+
 }
 
 func FindNodeWithChannel(k *Kademlia, c chan []Contact, remoteContact *Contact, search_id ID) error {
