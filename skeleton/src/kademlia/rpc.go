@@ -5,8 +5,10 @@ package kademlia
 
 import (
     "net"
+    "net/rpc"
     "fmt"
     "sort"
+    "log"
 )
 
 
@@ -128,18 +130,50 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
     ds := new(DistanceSorter)
     ds.Contacts = closestContacts
-    ds.DestID = k.NodeID
+    ds.DestID = req.NodeID
     sort.Sort(ds)
     shortlist := ds.Contacts
     closestNode := shortlist[0]
 
     //3. NodesToRPC function that takes a shortlist and returns up to alpha
     //nodes that we need to contact (checks if node is marked active doesn't add it to list)
+    
     //4. Send parallel FindNode RPC calls to contacts returned from NodesToRPC. *** CHANNELS GO HERE
+    c1 := make(chan []Contact)
+    c2 := make(chan []Contact)
+    c3 := make(chan []Contact)
+    
+    //the third argument here would be whatever NodesToRPC returns
+    go FindNodeWithChannel(k, c1, &shortlist[0], req.NodeID)
+    go FindNodeWithChannel(k, c2, &shortlist[1], req.NodeID)
+    go FindNodeWithChannel(k, c3, &shortlist[2], req.NodeID)
+
+/*
+Rula wrote this stuff:  
+for {
+    
+rpcs_returned := 3
+select {
+    case <- chan:
+        //add to short list
+        //check for exit conditions
+    }
+
+    go MakeFindNodeCall()
+
+*/
+
     //if contact responds: mark it as "active" -> map from contact node id to "active", "inactive"
     //5. UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
     //6. Update closestNode
     //7. Call General Update Function That We Haven't Done Before
     //8. Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
     return nil;
+}
+
+func FindNodeWithChannel(k *Kademlia, c chan []Contact, remoteContact *Contact, search_id ID) error {
+    FoundNodes, err := CallFindNode(k, remoteContact, search_id) 
+    FoundContacts := FoundNodesToContacts(FoundNodes)
+    c <- FoundContacts
+    return nil
 }

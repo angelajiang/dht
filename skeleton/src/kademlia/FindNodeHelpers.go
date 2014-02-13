@@ -5,6 +5,7 @@ package kademlia
 
 import (
 	"sort"
+    "net"
 )
 
 func FindClosestContacts(k *Kademlia, requestID ID) (closestContacts []Contact){
@@ -60,7 +61,7 @@ func PrefixLength(id ID, other ID) (dist int) {
 }
 
 func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
-    //Takes a splice of contacts and transforms it into a splice of foundNodes
+    //Takes a slice of contacts and transforms it into a slice of foundNodes
     //Output can be stored in a FindNodeResult
     foundNodes = make([]FoundNode, 0)
     for _, contact := range contacts{
@@ -73,3 +74,15 @@ func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
     return
 }
 
+func FoundNodesToContacts(foundNodes []FoundNode) (contacts []Contact) {
+    //Takes a slice of foundNodes and returns it as a slice of contacts
+    contacts = make([]Contact, 0)
+    for _, found_node := range foundNodes {
+        c := new(Contact)
+        c.NodeID = found_node.NodeID
+        c.Port = found_node.Port
+        c.Host = net.ParseIP(found_node.IPAddr)
+        contacts = append(contacts, *c)
+    }
+    return contacts
+}
