@@ -5,10 +5,11 @@ package kademlia
 
 import (
     "net"
-    "net/rpc"
+    //"net/rpc"
     "fmt"
     "sort"
-    "log"
+    //"log"
+    "time"
 )
 
 
@@ -139,15 +140,57 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     //nodes that we need to contact (checks if node is marked active doesn't add it to list)
     
     //4. Send parallel FindNode RPC calls to contacts returned from NodesToRPC. *** CHANNELS GO HERE
-    c1 := make(chan []Contact)
-    c2 := make(chan []Contact)
-    c3 := make(chan []Contact)
-    
+    rpc1 := make(chan []Contact)
+    rpc2 := make(chan []Contact)
+    rpc3 := make(chan []Contact)
     //the third argument here would be whatever NodesToRPC returns
-    go FindNodeWithChannel(k, c1, &shortlist[0], req.NodeID)
-    go FindNodeWithChannel(k, c2, &shortlist[1], req.NodeID)
-    go FindNodeWithChannel(k, c3, &shortlist[2], req.NodeID)
-
+    go FindNodeWithChannel(k, rpc1, &shortlist[0], req.NodeID)
+    go FindNodeWithChannel(k, rpc2, &shortlist[1], req.NodeID)
+    go FindNodeWithChannel(k, rpc3, &shortlist[2], req.NodeID)
+    
+    response1 := false
+    response2 := false
+    response3 := false
+    for {
+        select {
+        case res1 := <- rpc1:
+            response1 = true
+            //mark contact1 as active
+            //Update shortlist
+            //Update closestNode
+            //check for exit conditions
+        case res2 := <- rpc2:
+            response2 = true
+            //mark contact2 as active
+            //Update shortlist
+            //Update closestNode
+            //check for exit conditions
+        case res3 := <- rpc3:
+            response3 = true
+            //mark contact3 as active
+            //Update shortlist 
+            //Update closestNode
+            //check for exit conditions
+        case <- time.After(10 * 1e9): //timeout after 10 seconds
+            if !response1 {
+                //mark contact1 as inactive
+                //remove it from shortlist
+                //check for exit conditions
+            }
+            if !response2 {
+                //mark contact2 as inactive
+                //remove it from shortlist
+                //check for exit conditions
+            }
+            if !response3 {
+                //mark contact3 as inactive
+                //remove it from shortlist
+                //check for exit conditions
+            }
+        }
+    
+        //Make new RPC calls
+    }
 /*
 Rula wrote this stuff:  
 for {
@@ -172,7 +215,7 @@ select {
 }
 
 func FindNodeWithChannel(k *Kademlia, c chan []Contact, remoteContact *Contact, search_id ID) error {
-    FoundNodes, err := CallFindNode(k, remoteContact, search_id) 
+    FoundNodes, err := CallFindNode(k, remoteContact, search_id)
     FoundContacts := FoundNodesToContacts(FoundNodes)
     c <- FoundContacts
     return nil
