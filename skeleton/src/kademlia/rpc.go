@@ -216,6 +216,9 @@ select {
 
 func FindNodeWithChannel(k *Kademlia, c chan []Contact, remoteContact *Contact, search_id ID) error {
     FoundNodes, err := CallFindNode(k, remoteContact, search_id)
+    if err != nil {
+        fmt.Printf("Error calling FindNode RPC")
+    }
     FoundContacts := FoundNodesToContacts(FoundNodes)
     c <- FoundContacts
     return nil
