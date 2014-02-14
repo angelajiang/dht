@@ -224,3 +224,9 @@ func Update(k *Kademlia, contact *Contact) error {
     return errors.New("function not implemented")
 }
 
+/*
+func FindNodeFromNodeId(k *Kademlia, node_id ID) {
+   //GetBucketIndex?    
+
+}
+*/

@@ -99,6 +99,45 @@ func main() {
                     kademlia.FindContactLocally(kadem, id)
                 }
             case "store":
+                /*
+                node_id := []byte(cmdline_args[1])
+                key := []byte(cmdline_args[2])
+                val := []byte(cmdline_args[2])
+                
+                TODO: write a function that returns a contact from the node_id
+                contact := kademlia.FindNodeFromNodeID(node_id)
+                contact := new(Contact)
+                contact.NodeID = node_id
+                //contact.Port =
+                //contact.Host = 
+                err := kademlia.CallStore(contact, key, val)
+                if err != nil {
+                    fmt.Printf("error storing value\n")
+                }
+                */
+            case "find_node":
+                /*
+                node_id := []byte(cmdline_args[1])
+                key := []byte(cmdline_args[2])
+                */
+            case "find_value":
+                /*
+                node_id := []byte(cmdline_args[1])
+                key := []byte(cmdline_args[2])
+                */
+            case "iterativeStore":
+                /*
+                key := []byte(cmdline_args[1])
+                val := []byte(cmdline_args[2])
+                */
+            case "iterativeFindNode":
+                /*
+                node_id := []byte(cmdline_args[1])
+                */
+            case "iterativeFindValue":
+                /*
+                key := []byte(cmdline_args[1])
+                */
         }
     }
 }

@@ -124,6 +124,8 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
 }
 
 func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) error {
+
+    
     //1. FindClosestContacts -> this returns 3 closest nodes.
     closestContacts := FindClosestContacts(k, req.NodeID)
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
@@ -168,6 +170,9 @@ for {
                 node_state[response.NodeID] = "active"
                 alpha_contacts := NodesToRPC(node_state, response.Contacts)
                 shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
+                if closestNode.NodeID == shortlist[0].NodeID {
+                    break
+                }
                 closestNode = shortlist[0]    
                 //Update closestNode
                     //check for exit conditions
@@ -178,11 +183,17 @@ for {
     //make RPC calls again
     }
 
+    res.MsgID = ds.NodeID
+    res.Nodes = ContactsToFoundNodes(shortlist)
+    res.Err = nil
+
     //UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
     //Update closestNode
     //Call General Update Function That We Haven't Done Before
     //Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
+    
     return nil;
+    
 }
 
 func FindAndRemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
