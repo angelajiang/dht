@@ -65,7 +65,7 @@ func HashKey(key ID) []byte {
 func InBucket(contact *Contact, bucket Bucket) (in_bucket bool, index int) {
     /*Returns true if contact is in contact list of bucket*/
     in_bucket = false
-    for i,cur_contact := range bucket.Contacts {
+    for i, cur_contact := range bucket.Contacts {
         index = i
         if contact.NodeID == cur_contact.NodeID{
             in_bucket = true

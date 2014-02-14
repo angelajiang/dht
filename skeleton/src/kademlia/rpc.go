@@ -157,14 +157,19 @@ for {
     for {
         select {
             case <- timer_chan:
-                //Update shortlist
                 //remove inactive contacts
+                shortlist = FindAndRemoveInactiveContact(shortlist, node_state)
+                //Update shortlist
+                response := <-  main_chan
+                alpha_contacts := NodesToRPC(node_state, response.Contacts)
+                shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
                 break Loop
-            case result := <- main_chan:
-                node_state[result.NodeID] = "active"
-                    //contacts_to_rpc := NodesToRPC(node_state, result.Contacts)
-                    //Update shortlist 
-                    //Update closestNode
+            case response := <- main_chan:
+                node_state[response.NodeID] = "active"
+                alpha_contacts := NodesToRPC(node_state, response.Contacts)
+                shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
+                closestNode = shortlist[0]    
+                //Update closestNode
                     //check for exit conditions
                     //exit outside loop
                     //If none of the RPCed nodes updates closestNode : exit
@@ -180,16 +185,55 @@ for {
     return nil;
 }
 
-func UpdateShortlist(shortlist []Contact, rpc_contact Contact, alpha_contacts[]Contact, node_state map[ID]string) error {
-    //remove inactive contact from shortlist
-    if node_state[rpc_contact.NodeID]=="inactive" {
-        //remove from shortlist
+func FindAndRemoveInactiveContact(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
+    for _, contact := range shortlist {
+        if node_state[contact.NodeID] == "inactive" {
+            new_shortlist = RemoveInactiveContact(shortlist, contact, node_state)
+        }
     }
-    
+    return
+}
+
+func RemoveInactiveContact(shortlist []Contact, contact Contact, node_state map[ID]string) (new_shortlist []Contact) {
+    //remove inactive rpc contact from shortlist
+    if node_state[contact.NodeID]=="inactive" {
+        //remove from shortlist
+        var index int
+        for i, cur_contact := range shortlist {
+            if cur_contact.NodeID == contact.NodeID {
+                index = i
+                break
+            }
+        }
+        new_shortlist = append(new_shortlist, shortlist[0:index]...)
+        new_shortlist = append(new_shortlist, shortlist[index+1:]...)
+    }
+    return new_shortlist
+}
+
+func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) (new_shortlist []Contact) {
     //add new alpha contacts to shortlist
     //make sure they aren't duplicated though or "inactive"
-    return nil
+        for _, alpha_contact := range alpha_contacts {
+            for _, cur_contact := range new_shortlist {
+                if alpha_contact.NodeID == cur_contact.NodeID ||
+                node_state[alpha_contact.NodeID] == "inactive" {
+                    continue
+                } else {
+                    new_shortlist = append(new_shortlist, alpha_contact)
+                    break
+                }
+            }
+        }
+        //sort new_shortlist
+        ds := new(IDandContacts)
+        ds.Contacts = new_shortlist
+        ds.NodeID = dest_id
+        sort.Sort(ds)
+        new_shortlist = ds.Contacts
+        return new_shortlist
 }
+
 func NodesToRPC(node_state map[ID]string, nodes []Contact)(nodes_to_call_rpc_on []Contact) {
 //Takes a map of the "active/inactive" contacts and a list of contacts
 //returns a list of the contacts we didn't query before that we should make RPC calls to
