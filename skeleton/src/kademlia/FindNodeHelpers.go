@@ -32,9 +32,9 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContactsPtr
         //No contacts in this bucket
         return
     }
-    ds := new(DistanceSorter)
+    ds := new(IDandContacts)
     ds.Contacts = k.Buckets[index].Contacts
-    ds.DestID = requestID
+    ds.NodeID = requestID
     sort.Sort(ds)
     sorted_contacts := make([]Contact, 0)
     sorted_contacts = ds.Contacts       //Holds sorted contacts of bucket

@@ -127,119 +127,73 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     //1. FindClosestContacts -> this returns 3 closest nodes.
     closestContacts := FindClosestContacts(k, req.NodeID)
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
-    ds := new(DistanceSorter)
+    ds := new(IDandContacts)
     ds.Contacts = closestContacts
-    ds.DestID = req.NodeID
+    ds.NodeID = req.NodeID
     sort.Sort(ds)
     shortlist := ds.Contacts
     closestNode := shortlist[0]
     node_state := make(map[ID]string)
 
-    //3. NodesToRPC function that takes a shortlist and returns up to alpha
-    //nodes that we need to contact (checks if node is marked active doesn't add it to list)
-    
-    //4. Send parallel FindNode RPC calls to contacts returned from NodesToRPC. *** CHANNELS GO HERE
-    rpc1 := make(chan []Contact)
-    rpc2 := make(chan []Contact)
-    rpc3 := make(chan []Contact)
-    //the third argument here would be whatever NodesToRPC returns
-    go FindNodeWithChannel(k, rpc1, &shortlist[0], req.NodeID)
-    go FindNodeWithChannel(k, rpc2, &shortlist[1], req.NodeID)
-    go FindNodeWithChannel(k, rpc3, &shortlist[2], req.NodeID)
-    
-    response1 := false
-    response2 := false
-    response3 := false
-  
+for {
+    //Check updated closestContact boolean or   
+    rpc_nodes := NodesToRPC(node_state, shortlist)
+    main_chan := make(chan IDandContacts)
+    timer_chan := make(chan bool)
+
+    for _, c := range rpc_nodes {
+        go func() {
+            node_state[c.NodeID] = "inactive"
+            main_chan <- FindNodeWithChannel(k, &c, req.NodeID)
+        }()
+    }
+
+
+    go func() {
+        time.Sleep(100 * time.Millisecond)
+        timer_chan <- true
+    }()
+
+    Loop:
     for {
         select {
-        case res1 := <- rpc1:
-            response1 = true
-            //mark contact1 as active
-            node_state[shortlist[0].NodeID] = "active"
-            //Check if we need to make RPC calls to any of the contacts returned in the channel
-            contacts_to_rpc := NodesToRPC(node_state, res1)
-            //Update shortlist
-            //Update closestNode
-            //check for exit conditions
-        case res2 := <- rpc2:
-            response2 = true
-            //mark contact2 as active
-            node_state[shortlist[1].NodeID] = "active"
-            //Check if we need to make RPC calls to any of the contacts returned in the channel
-            contacts_to_rpc := NodesToRPC(node_state, res2)
-            //Update shortlist
-            //Update closestNode
-            //check for exit conditions
-        case res3 := <- rpc3:
-            response3 = true
-            //mark contact3 as active
-            node_state[shortlist[2].NodeID] = "active"
-            //Check if we need to make RPC calls to any of the contacts returned in the channel
-            contacts_to_rpc := NodesToRPC(node_state, res3)
-            
-            //Update shortlist 
-            //Update closestNode
-            //check for exit conditions
-        case <- time.After(10 * 1e9): //timeout after 10 seconds
-            if !response1 {
-                //mark contact1 as inactive
-                node_state[shortlist[0].NodeID] = "inactive"
-                //remove it from shortlist
-                //check for exit conditions
-            }
-            if !response2 {
-                //mark contact2 as inactive
-                node_state[shortlist[1].NodeID] = "inactive"
-                //remove it from shortlist
-                //check for exit conditions
-            }
-            if !response3 {
-                //mark contact3 as inactive
-                node_state[shortlist[2].NodeID] = "inactive"
-                //remove it from shortlist
-                //check for exit conditions
+            case <- timer_chan:
+                //Update shortlist
+                //remove inactive contacts
+                break Loop
+            case result := <- main_chan:
+                node_state[result.NodeID] = "active"
+                    //contacts_to_rpc := NodesToRPC(node_state, result.Contacts)
+                    //Update shortlist 
+                    //Update closestNode
+                    //check for exit conditions
+                    //exit outside loop
+                    //If none of the RPCed nodes updates closestNode : exit
             }
         }
-        
-        //Make new RPC calls
+    //make RPC calls again
     }
 
-/*
-Rula wrote this stuff:  
-for {
-    
-rpcs_returned := 3
-select {
-    case <- chan:
-        //add to short list
-        //check for exit conditions
-    }
-
-    go MakeFindNodeCall()
-
-*/
-
-    //if contact responds: mark it as "active" -> map from contact node id to "active", "inactive"
-    //5. UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
-    //6. Update closestNode
-    //7. Call General Update Function That We Haven't Done Before
-    //8. Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
+    //UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
+    //Update closestNode
+    //Call General Update Function That We Haven't Done Before
+    //Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
     return nil;
 }
 
 func NodesToRPC(node_state map[ID]string, nodes []Contact)(nodes_to_call_rpc_on []Contact) {
 //Takes a map of the "active/inactive" contacts and a list of contacts
 //returns a list of the contacts we didn't query before that we should make RPC calls to
-
+return nil
 }
 
-func FindNodeWithChannel(k *Kademlia, c chan []Contact, remoteContact *Contact, search_id ID) error {
+func FindNodeWithChannel(k *Kademlia, remoteContact *Contact, search_id ID) (ret IDandContacts) {
     FoundNodes, err := CallFindNode(k, remoteContact, search_id)
     if err != nil {
         fmt.Printf("Error calling FindNode RPC")
     }
     FoundContacts := FoundNodesToContacts(FoundNodes)
-    c <- FoundContacts
-    return nil
+    ret.NodeID = remoteContact.NodeID
+    ret.Contacts = FoundContacts
+    return
 }

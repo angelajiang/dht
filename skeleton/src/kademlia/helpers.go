@@ -11,21 +11,21 @@ import (
     "time"
 )
 
-type DistanceSorter struct {
-	DestID ID
+type IDandContacts struct {
+	NodeID ID
 	Contacts []Contact
 }
 
-func (ds *DistanceSorter) Len() int {
+func (ds *IDandContacts) Len() int {
     return len(ds.Contacts)
 }
 
-func (ds *DistanceSorter) Swap(i, j int) {
+func (ds *IDandContacts) Swap(i, j int) {
     ds.Contacts[i], ds.Contacts[j] = ds.Contacts[j], ds.Contacts[i]
 }
 
-func (ds *DistanceSorter) Less(i, j int) bool {
-	return PrefixLength(ds.Contacts[i].NodeID, ds.DestID) > PrefixLength(ds.Contacts[j].NodeID, ds.DestID)
+func (ds *IDandContacts) Less(i, j int) bool {
+	return PrefixLength(ds.Contacts[i].NodeID, ds.NodeID) > PrefixLength(ds.Contacts[j].NodeID, ds.NodeID)
 }
 
 

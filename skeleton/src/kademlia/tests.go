@@ -100,10 +100,10 @@ func TestSortByDistance(){
 	contacts := make([]Contact, 0)
 	FillTestContactSlice(&contacts, 3)
     fmt.Printf("ContactsToSort: %v\n\n", contacts)
-    ds := new(DistanceSorter)
+    ds := new(IDandContacts)
     ds.Contacts = contacts
     dest_id := NewRandomID()
-    ds.DestID = dest_id
+    ds.NodeID = dest_id
     sort.Sort(ds)
     fmt.Printf("Sorted: %v\n\n", ds.Contacts)
 }
