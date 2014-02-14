@@ -148,9 +148,8 @@ for {
         }()
     }
 
-
     go func() {
-        time.Sleep(100 * time.Millisecond)
+        time.Sleep(300 * time.Millisecond)
         timer_chan <- true
     }()
 
@@ -181,6 +180,16 @@ for {
     return nil;
 }
 
+func UpdateShortlist(shortlist []Contact, rpc_contact Contact, alpha_contacts[]Contact, node_state map[ID]string) error {
+    //remove inactive contact from shortlist
+    if node_state[rpc_contact.NodeID]=="inactive" {
+        //remove from shortlist
+    }
+    
+    //add new alpha contacts to shortlist
+    //make sure they aren't duplicated though or "inactive"
+    return nil
+}
 func NodesToRPC(node_state map[ID]string, nodes []Contact)(nodes_to_call_rpc_on []Contact) {
 //Takes a map of the "active/inactive" contacts and a list of contacts
 //returns a list of the contacts we didn't query before that we should make RPC calls to
