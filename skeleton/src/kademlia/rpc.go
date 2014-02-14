@@ -158,7 +158,7 @@ for {
         select {
             case <- timer_chan:
                 //remove inactive contacts
-                shortlist = FindAndRemoveInactiveContact(shortlist, node_state)
+                shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
                 //Update shortlist
                 response := <-  main_chan
                 alpha_contacts := NodesToRPC(node_state, response.Contacts)
@@ -185,7 +185,7 @@ for {
     return nil;
 }
 
-func FindAndRemoveInactiveContact(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
+func FindAndRemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
     for _, contact := range shortlist {
         if node_state[contact.NodeID] == "inactive" {
             new_shortlist = RemoveInactiveContact(shortlist, contact, node_state)
