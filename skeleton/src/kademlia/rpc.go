@@ -135,49 +135,63 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     sort.Sort(ds)
     shortlist := ds.Contacts
     closestNode := shortlist[0]
+    updatedClosestContact := true
+
     node_state := make(map[ID]string)
 
-for {
-    //Check updated closestContact boolean or   
-    rpc_nodes := NodesToRPC(node_state, shortlist)
     main_chan := make(chan IDandContacts)
     timer_chan := make(chan bool)
 
+
+Shortlist_Loop:
+for {
+    //Exit conditions
+    if updatedClosestContact == false{
+        //RPC calls did not return any contacts closer than current closest node
+        break Shortlist_Loop
+    }
+    rpc_nodes := GetAlphaNodesToRPC(node_state, shortlist)
+    if len(rpc_nodes) == 0{
+        //No more nodes in shortlist to query
+        break Shortlist_Loop
+    }
+
+    //Did not exit. Start another iteration of sending alpha RPCs
+    updatedClosestContact = false
     for _, c := range rpc_nodes {
         go func() {
             node_state[c.NodeID] = "inactive"
             main_chan <- FindNodeWithChannel(k, &c, req.NodeID)
         }()
     }
-
     go func() {
         time.Sleep(300 * time.Millisecond)
         timer_chan <- true
     }()
 
-    Loop:
+    Alpha_Loop:
     for {
+        //Wait for reponses from RPC calls and timer
         select {
             case <- timer_chan:
-                //remove inactive contacts
+                //remove contacts that did not respond to RPC from shortlist
                 shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+
+                //Shouldn't care about results in main_chan after the timer runs out
+
                 //Update shortlist
-                response := <-  main_chan
-                alpha_contacts := NodesToRPC(node_state, response.Contacts)
-                shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
-                break Loop
+                //response := <-  main_chan
+                //alpha_contacts := NodesToRPC(node_state, response.Contacts)
+                //shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
+                break Alpha_Loop
             case response := <- main_chan:
                 node_state[response.NodeID] = "active"
-                alpha_contacts := NodesToRPC(node_state, response.Contacts)
-                shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
-                if closestNode.NodeID == shortlist[0].NodeID {
-                    break
+                //alpha_contacts := NodesToRPC(node_state, response.Contacts)
+                shortlist = UpdateShortlist(shortlist, response.Contacts, req.NodeID, node_state)
+                if closestNode.NodeID != shortlist[0].NodeID {
+                    closestNode = shortlist[0]    
+                    updatedClosestContact = true
                 }
-                closestNode = shortlist[0]    
-                //Update closestNode
-                    //check for exit conditions
-                    //exit outside loop
-                    //If none of the RPCed nodes updates closestNode : exit
             }
         }
     //make RPC calls again
@@ -222,33 +236,45 @@ func RemoveInactiveContact(shortlist []Contact, contact Contact, node_state map[
     return new_shortlist
 }
 
-func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) (new_shortlist []Contact) {
+func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) []Contact {
     //add new alpha contacts to shortlist
     //make sure they aren't duplicated though or "inactive"
-        for _, alpha_contact := range alpha_contacts {
-            for _, cur_contact := range new_shortlist {
-                if alpha_contact.NodeID == cur_contact.NodeID ||
-                node_state[alpha_contact.NodeID] == "inactive" {
-                    continue
-                } else {
-                    new_shortlist = append(new_shortlist, alpha_contact)
-                    break
-                }
+    for _, alpha_contact := range alpha_contacts {
+        for _, cur_contact := range shortlist {
+            if alpha_contact.NodeID == cur_contact.NodeID ||
+            node_state[alpha_contact.NodeID] == "inactive" {
+                continue
+            } else {
+                shortlist = append(shortlist, alpha_contact)
+                break
             }
         }
-        //sort new_shortlist
-        ds := new(IDandContacts)
-        ds.Contacts = new_shortlist
-        ds.NodeID = dest_id
-        sort.Sort(ds)
-        new_shortlist = ds.Contacts
-        return new_shortlist
+    }
+    //sort new_shortlist
+    ds := new(IDandContacts)
+    ds.Contacts = shortlist
+    ds.NodeID = dest_id
+    sort.Sort(ds)
+    shortlist = ds.Contacts
+    return shortlist
 }
 
-func NodesToRPC(node_state map[ID]string, nodes []Contact)(nodes_to_call_rpc_on []Contact) {
+func GetAlphaNodesToRPC(node_state map[ID]string, nodes []Contact)(alpha_contacts_to_rpc []Contact) {
 //Takes a map of the "active/inactive" contacts and a list of contacts
-//returns a list of the contacts we didn't query before that we should make RPC calls to
-return nil
+//returns a list of alpha contacts we didn't query before that we should make RPC calls to
+    alpha_contacts_to_rpc = make([]Contact, 0, ALPHA)
+    for _, c := range nodes{
+        if _,ok := node_state[c.NodeID]; ok {
+            //If it's in node_state, then we've already sent an rpc
+            continue
+        } else{
+            alpha_contacts_to_rpc = append(alpha_contacts_to_rpc, c)
+            if len(alpha_contacts_to_rpc) == cap(alpha_contacts_to_rpc){
+                return
+            }
+        }
+    }
+    return
 }
 
 func FindNodeWithChannel(k *Kademlia, remoteContact *Contact, search_id ID) (ret IDandContacts) {
