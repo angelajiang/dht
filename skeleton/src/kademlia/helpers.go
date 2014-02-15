@@ -83,18 +83,6 @@ func IsFull(bucket Bucket) bool {
     return false
 }
 
-func random(min, max int) int {
-    rand.Seed(time.Now().UnixNano())
-    return rand.Intn(max - min) + min
-}
-
-func NewRandomContact()(*Contact){
-	port := uint16(random(4000,5000))
-    ip := net.ParseIP("127.0.0.1")
-    nodeid := NewRandomID()
-    return &Contact{nodeid, ip, port}
-}
-
 func GetBucketIndex(distance ID)(index int){
 	/*Given distance, returns first set bit counting from MSB
 	 	ex) 0011 0101 -> 3	*/
@@ -109,4 +97,28 @@ func GetBucketIndex(distance ID)(index int){
     }
 	return 
 }
+    
+//TESTING HELPERS
+
+func random(min, max int) int {
+    rand.Seed(time.Now().UnixNano())
+    return rand.Intn(max - min) + min
+}
+
+func NewRandomContact()(*Contact){
+    port := uint16(random(4000,5000))
+    ip := net.ParseIP("127.0.0.1")
+    nodeid := NewRandomID()
+    return &Contact{nodeid, ip, port}
+}
+
+
+func GetFirstBytesOfNodeIDs(contacts []Contact) (bytes []byte){
+    bytes = make([]byte, 0)
+    for _, c := range contacts{
+        bytes = append(bytes, c.NodeID[0])
+    }
+    return
+}
+
 

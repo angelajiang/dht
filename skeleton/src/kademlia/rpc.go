@@ -238,17 +238,17 @@ func RemoveInactiveContact(shortlist []Contact, contact Contact, node_state map[
 }
 
 func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) []Contact {
-    //add new alpha contacts to shortlist
-    //make sure they aren't duplicated though or "inactive"
     for _, alpha_contact := range alpha_contacts {
+        should_add := true
         for _, cur_contact := range shortlist {
             if alpha_contact.NodeID == cur_contact.NodeID ||
             node_state[alpha_contact.NodeID] == "inactive" {
-                continue
-            } else {
-                shortlist = append(shortlist, alpha_contact)
+                should_add = false
                 break
-            }
+            } 
+        }
+        if should_add {
+            shortlist = append(shortlist, alpha_contact)
         }
     }
     //sort new_shortlist
@@ -258,6 +258,7 @@ func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, n
     sort.Sort(ds)
     shortlist = ds.Contacts
     return shortlist
+
 }
 
 func GetAlphaNodesToRPC(nodes []Contact, node_state map[ID]string) (alpha_contacts_to_rpc []Contact) {

@@ -209,7 +209,7 @@ func TestUpdateShortlist(k *Kademlia){
 
     ref_result := make([]Contact, 0)
     ref_result = append(ref_result, shortlist...)
-    ref_result = append(ref_result, *inactive)
+    ref_result = append(ref_result, *active2)
     ds := new(IDandContacts)
     ds.Contacts = ref_result
     ds.NodeID = k.NodeID
@@ -218,13 +218,11 @@ func TestUpdateShortlist(k *Kademlia){
   	strSlice1 := fmt.Sprintf("%v", result)
     strSlice2 := fmt.Sprintf("%v", ref_result)
     if strSlice1 != strSlice2 {
-    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", result, ref_result)
+    	fmt.Printf("length of result: %v. Should be 4.\n", len(result))
+    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", GetFirstBytesOfNodeIDs(result), GetFirstBytesOfNodeIDs(ref_result))
     	log.Fatal("TestUpdateShortlist: FAILED\n")
     }
 }
-
-
-
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestUpdate(k, 100)
