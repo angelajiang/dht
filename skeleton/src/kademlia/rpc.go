@@ -196,9 +196,10 @@ for {
         }
     //make RPC calls again
     }
-
-    res.MsgID = ds.NodeID
+    shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+    shortlist = RemoveNodesToRPC(shortlist, node_state)
     res.Nodes = ContactsToFoundNodes(shortlist)
+    res.MsgID = ds.NodeID
     res.Err = nil
 
     //UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
@@ -275,6 +276,18 @@ func GetAlphaNodesToRPC(node_state map[ID]string, nodes []Contact)(alpha_contact
         }
     }
     return
+}
+
+func RemoveNodesToRPC(shortlist []Contact, node_state map[ID]string) []Contact{
+    //Update shortlist to only include nodes that we've sent RPCs for
+    new_shortlist := make([]Contact,0)
+    for _, c := range shortlist{
+        if _,ok := node_state[c.NodeID]; ok {
+            //If it's in node_state, then we've already sent an rpc
+            new_shortlist = append(new_shortlist, c)
+        }
+    }
+    return new_shortlist
 }
 
 func FindNodeWithChannel(k *Kademlia, remoteContact *Contact, search_id ID) (ret IDandContacts) {
