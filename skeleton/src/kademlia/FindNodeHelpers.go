@@ -51,7 +51,6 @@ func AddNodesFromBucket(k *Kademlia, index int, requestID ID, closestContactsPtr
     return
 }
 
-
 func PrefixLength(id ID, other ID) (dist int) {
     dist = id.PrefixLen() - other.PrefixLen()
     if dist < 0 {

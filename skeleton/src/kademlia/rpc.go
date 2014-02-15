@@ -258,7 +258,6 @@ func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, n
     sort.Sort(ds)
     shortlist = ds.Contacts
     return shortlist
-
 }
 
 func GetAlphaNodesToRPC(nodes []Contact, node_state map[ID]string) (alpha_contacts_to_rpc []Contact) {

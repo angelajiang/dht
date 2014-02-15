@@ -11,21 +11,38 @@ import (
     "time"
 )
 
+//Implemented sort for contacts
 type IDandContacts struct {
 	NodeID ID
 	Contacts []Contact
 }
-
 func (ds *IDandContacts) Len() int {
     return len(ds.Contacts)
 }
-
 func (ds *IDandContacts) Swap(i, j int) {
     ds.Contacts[i], ds.Contacts[j] = ds.Contacts[j], ds.Contacts[i]
 }
-
 func (ds *IDandContacts) Less(i, j int) bool {
-	return PrefixLength(ds.Contacts[i].NodeID, ds.NodeID) > PrefixLength(ds.Contacts[j].NodeID, ds.NodeID)
+    i_dist := ds.Contacts[i].NodeID.Xor(ds.NodeID)
+    j_dist := ds.Contacts[j].NodeID.Xor(ds.NodeID)
+    return i_dist.PrefixLen() > j_dist.PrefixLen()
+}
+
+//Implemented sort for IDs
+type IDSorter struct{
+    NodeID ID
+    IDs []ID
+}
+func (idsort *IDSorter) Len() int {
+    return len(idsort.IDs)
+}
+func (idsort *IDSorter) Swap(i, j int) {
+    idsort.IDs[i], idsort.IDs[j] = idsort.IDs[j], idsort.IDs[i]
+}
+func (idsort *IDSorter) Less(i, j int) bool {
+    i_dist := idsort.IDs[i].Xor(idsort.NodeID)
+    j_dist := idsort.IDs[j].Xor(idsort.NodeID)
+    return i_dist.PrefixLen() > j_dist.PrefixLen()
 }
 
 
@@ -113,7 +130,14 @@ func NewRandomContact()(*Contact){
 }
 
 
-func GetFirstBytesOfNodeIDs(contacts []Contact) (bytes []byte){
+func FirstBytesOfIDs(ids []ID) (bytes []byte){
+    bytes = make([]byte, 0)
+    for _, id := range ids{
+        bytes = append(bytes, id[0])
+    }
+    return
+}
+func FirstBytesOfContactIDs(contacts []Contact) (bytes []byte){
     bytes = make([]byte, 0)
     for _, c := range contacts{
         bytes = append(bytes, c.NodeID[0])

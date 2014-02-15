@@ -5,7 +5,7 @@ import (
 	"net/rpc"
 	"fmt"
 	"sort"
-
+    "strings"
 )
 
 func TestPingFirstPeer(k *Kademlia, first_peer_str string){
@@ -219,9 +219,36 @@ func TestUpdateShortlist(k *Kademlia){
     strSlice2 := fmt.Sprintf("%v", ref_result)
     if strSlice1 != strSlice2 {
     	fmt.Printf("length of result: %v. Should be 4.\n", len(result))
-    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", GetFirstBytesOfNodeIDs(result), GetFirstBytesOfNodeIDs(ref_result))
+    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", FirstBytesOfContactIDs(result), FirstBytesOfContactIDs(ref_result))
     	log.Fatal("TestUpdateShortlist: FAILED\n")
     }
+}
+
+func TestIterativeFindNode(k *Kademlia)(sorted_ids []ID){
+    ids := make([]ID, 0)
+    hex_digits := [15]string {"1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
+    for _,d := range hex_digits{
+       ids = append(ids, HexDigitToID(d, 20)) 
+    }
+    k_id := HexDigitToID("f", 20)
+
+    idsort := new(IDSorter)
+    idsort.IDs = ids
+    idsort.NodeID = k_id
+    sort.Sort(idsort)
+    sorted_ids = idsort.IDs
+
+    fmt.Printf("Sorted by distance to nodeid %v:\n%A", k_id[0], FirstBytesOfIDs(sorted_ids))
+
+	return
+}
+
+func HexDigitToID(hex_digit string, n int) (id ID){
+    //Takes hex number of all digits as "digit"
+    //returns number as n-byte id
+    //HexDigitToID(f,160) -> ffff....ffff to byte array of size 160
+    id, _ = FromString(strings.Repeat(hex_digit, n*2))
+    return
 }
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
@@ -229,7 +256,7 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
-	//TestSortByDistance()
+	TestSortByDistance()
 	//TestFindClosestContacts(k)
 	//TestFindNode(k)
 
@@ -237,6 +264,8 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestGetAlphaNodesToRPC()
 	//TestRemoveNodesToRPC_FindAndRemoveInactiveContacts()
 	TestUpdateShortlist(k)
+	TestIterativeFindNode(k)
+
 	fmt.Printf("\n\n")
 
 }
