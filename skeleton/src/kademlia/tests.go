@@ -159,6 +159,33 @@ func TestGetAlphaNodesToRPC(){
     }
 
 }
+func TestRemoveNodesToRPC_FindAndRemoveInactiveContacts(){
+	fmt.Println("\nTESTING: TestRemoveNodesToRPC and FindAndRemoveInactiveContacts\n")
+	//Put nodes that are active, inactive and not in node_list
+	//Should return only active nodes
+    node_state := make(map[ID]string)
+	already_contacted := make([]Contact,0)
+	not_contacted := make([]Contact,0)
+	FillTestContactSlice(&already_contacted, 4)
+	FillTestContactSlice(&not_contacted, 1)
+    node_state[already_contacted[0].NodeID] = "active"
+    node_state[already_contacted[1].NodeID] = "inactive"
+    node_state[already_contacted[2].NodeID] = "active"
+    shortlist := make([]Contact, 0)
+    shortlist = append(shortlist, already_contacted[0], already_contacted[1], not_contacted[0], already_contacted[2])
+    ref_alphalist := make([]Contact, 0)
+    ref_alphalist = append(ref_alphalist, already_contacted[0], already_contacted[2])
+    shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+    result := RemoveNodesToRPC(shortlist, node_state)
+  	strSlice1 := fmt.Sprintf("%v", result)
+    strSlice2 := fmt.Sprintf("%v", ref_alphalist)
+    if strSlice1 != strSlice2 {
+    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", result, ref_alphalist)
+    	log.Fatal("TestRemoveNodesToRPC: FAILED\n")
+    }
+}
+
+
 
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
@@ -169,7 +196,8 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestSortByDistance()
 	//TestFindClosestContacts(k)
 	//TestFindNode(k)
-	TestGetAlphaNodesToRPC()
+	//TestGetAlphaNodesToRPC()
+	TestRemoveNodesToRPC()
 	fmt.Printf("\n\n")
 
 }
