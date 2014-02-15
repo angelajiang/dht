@@ -150,7 +150,7 @@ for {
         //RPC calls did not return any contacts closer than current closest node
         break Shortlist_Loop
     }
-    rpc_nodes := GetAlphaNodesToRPC(node_state, shortlist)
+    rpc_nodes := GetAlphaNodesToRPC(shortlist, node_state)
     if len(rpc_nodes) == 0{
         //No more nodes in shortlist to query
         break Shortlist_Loop
@@ -260,7 +260,7 @@ func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, n
     return shortlist
 }
 
-func GetAlphaNodesToRPC(node_state map[ID]string, nodes []Contact)(alpha_contacts_to_rpc []Contact) {
+func GetAlphaNodesToRPC(nodes []Contact, node_state map[ID]string) (alpha_contacts_to_rpc []Contact) {
 //Takes a map of the "active/inactive" contacts and a list of contacts
 //returns a list of alpha contacts we didn't query before that we should make RPC calls to
     alpha_contacts_to_rpc = make([]Contact, 0, ALPHA)

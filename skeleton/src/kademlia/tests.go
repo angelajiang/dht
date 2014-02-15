@@ -118,27 +118,58 @@ func TestFindClosestContacts(k *Kademlia){
 }
 
 func TestFindNode(k *Kademlia){
-
 	fmt.Println("\nTESTING: TestFindNode\n")
 	c := NewRandomContact()
 	c.Port = 7777
 	closestContacts, _ := CallFindNode(k, c, NewRandomID())
 	fmt.Printf("ClosestContacts: %v\n", closestContacts)
+}
 
-
-
+func TestGetAlphaNodesToRPC(){
+	fmt.Println("\nTESTING: TestGetAlphaNodesToRPC\n")
+	//Put 2 contacts into node_state and shortlist.
+	//See if they're removed from shortlist
+    node_state := make(map[ID]string)
+	already_contacted := make([]Contact,0)
+	not_contacted := make([]Contact,0)
+	FillTestContactSlice(&already_contacted, 2)
+	FillTestContactSlice(&not_contacted, 5)
+    node_state[already_contacted[0].NodeID] = "active"
+    node_state[already_contacted[1].NodeID] = "inactive"
+    //Test A: Less than alpha to rpc
+    shortlist := make([]Contact, 0)
+    shortlist = append(shortlist, already_contacted[0], not_contacted[0], already_contacted[1])
+    ref_alphalist := make([]Contact,0)
+    ref_alphalist = append(ref_alphalist, not_contacted[0])
+    alphalist := GetAlphaNodesToRPC(shortlist, node_state)
+    fmt.Printf("Test1: Resulting shortlist: %v\n. Should contain: %v\n", alphalist, ref_alphalist)
+  	strSlice1 := fmt.Sprintf("%v", alphalist)
+    strSlice2 := fmt.Sprintf("%v", ref_alphalist)
+    if strSlice1 != strSlice2 {
+    	log.Fatal("TestGetAlphaNodesToRPC: FAILED\n")
+    }
+    shortlist = append(shortlist, not_contacted[1], not_contacted[2], not_contacted[3])
+    ref_alphalist = append(ref_alphalist, not_contacted[1], not_contacted[2])
+    alphalist = GetAlphaNodesToRPC(shortlist, node_state)
+    fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", alphalist, ref_alphalist)
+  	strSlice1 = fmt.Sprintf("%v", alphalist)
+    strSlice2 = fmt.Sprintf("%v", ref_alphalist)
+    if strSlice1 != strSlice2 {
+    	log.Fatal("TestGetAlphaNodesToRPC: FAILED\n")
+    }
 
 }
 
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
-	TestUpdate(k, 100)
+	//TestUpdate(k, 100)
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
 	//TestSortByDistance()
 	//TestFindClosestContacts(k)
-	TestFindNode(k)
+	//TestFindNode(k)
+	TestGetAlphaNodesToRPC()
 	fmt.Printf("\n\n")
 
 }
