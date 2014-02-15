@@ -157,8 +157,8 @@ func TestGetAlphaNodesToRPC(){
     if strSlice1 != strSlice2 {
     	log.Fatal("TestGetAlphaNodesToRPC: FAILED\n")
     }
-
 }
+
 func TestRemoveNodesToRPC_FindAndRemoveInactiveContacts(){
 	fmt.Println("\nTESTING: TestRemoveNodesToRPC and FindAndRemoveInactiveContacts\n")
 	//Put nodes that are active, inactive and not in node_list
@@ -173,15 +173,53 @@ func TestRemoveNodesToRPC_FindAndRemoveInactiveContacts(){
     node_state[already_contacted[2].NodeID] = "active"
     shortlist := make([]Contact, 0)
     shortlist = append(shortlist, already_contacted[0], already_contacted[1], not_contacted[0], already_contacted[2])
-    ref_alphalist := make([]Contact, 0)
-    ref_alphalist = append(ref_alphalist, already_contacted[0], already_contacted[2])
+    ref_result := make([]Contact, 0)
+    ref_result = append(ref_result, already_contacted[0], already_contacted[2])
     shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
     result := RemoveNodesToRPC(shortlist, node_state)
   	strSlice1 := fmt.Sprintf("%v", result)
-    strSlice2 := fmt.Sprintf("%v", ref_alphalist)
+    strSlice2 := fmt.Sprintf("%v", ref_result)
     if strSlice1 != strSlice2 {
-    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", result, ref_alphalist)
+    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", result, ref_result)
     	log.Fatal("TestRemoveNodesToRPC: FAILED\n")
+    }
+}
+
+func TestUpdateShortlist(k *Kademlia){
+	//Make shortlist with duplicates and inactive contacts
+	//Should return SL that's shorted, with duplicates/inactives removed
+
+	fmt.Println("\nTESTING: TestUpdateShortlist\n")
+	active := NewRandomContact()
+	active2 := NewRandomContact()
+	torpc := NewRandomContact()
+	duplicate := NewRandomContact()
+	inactive := NewRandomContact()
+    node_state := make(map[ID]string)
+	node_state[active.NodeID] = "active"
+	node_state[active2.NodeID] = "active"
+	node_state[duplicate.NodeID] = "active"
+	node_state[inactive.NodeID] = "inactive"
+
+    shortlist := make([]Contact, 0)
+    shortlist = append(shortlist, *duplicate, *active, *torpc)
+    alphalist := make([]Contact, 0)
+    alphalist = append(alphalist, *duplicate, *inactive, *active2)
+    result := UpdateShortlist(shortlist, alphalist, k.NodeID, node_state)
+
+    ref_result := make([]Contact, 0)
+    ref_result = append(ref_result, shortlist...)
+    ref_result = append(ref_result, *inactive)
+    ds := new(IDandContacts)
+    ds.Contacts = ref_result
+    ds.NodeID = k.NodeID
+    sort.Sort(ds)
+    ref_result = ds.Contacts
+  	strSlice1 := fmt.Sprintf("%v", result)
+    strSlice2 := fmt.Sprintf("%v", ref_result)
+    if strSlice1 != strSlice2 {
+    	fmt.Printf("Test2: Resulting shortlist: %v\n. Should contain: %v\n", result, ref_result)
+    	log.Fatal("TestUpdateShortlist: FAILED\n")
     }
 }
 
@@ -196,8 +234,11 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestSortByDistance()
 	//TestFindClosestContacts(k)
 	//TestFindNode(k)
+
+	//Tests where failure leads to exiting program:
 	//TestGetAlphaNodesToRPC()
-	TestRemoveNodesToRPC()
+	//TestRemoveNodesToRPC_FindAndRemoveInactiveContacts()
+	TestUpdateShortlist(k)
 	fmt.Printf("\n\n")
 
 }
