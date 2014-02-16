@@ -114,7 +114,15 @@ func GetBucketIndex(distance ID)(index int){
     }
 	return 
 }
-    
+
+func MoveToEnd(list []Contact, index int) (ret []Contact) {
+    //list = a, b, c -> b, c, a
+    contact := list[index]
+    ret = append(list[:index], list[(index+1):]...)
+    ret = append(ret, contact)
+    return
+}
+
 //TESTING HELPERS
 
 func Random(min, max int) int {
