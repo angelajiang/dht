@@ -82,12 +82,18 @@ type FindNodeResult struct {
     Err error
 }
 
+func NewFindNodeResult(msgID ID) (res *FindNodeResult){
+    res = new(FindNodeResult)
+    res.MsgID = msgID
+    res.Nodes = make([]FoundNode, 0, ALPHA) 
+    return
+}
+
 func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     //check if we're the node in question
     if req.NodeID == k.NodeID {
-        res.Nodes[0].NodeID = k.NodeID
-        res.Nodes[0].IPAddr = k.Host.String()
-        res.Nodes[0].Port = k.Port
+        foundContact := ContactToFoundNode(k.KContact)
+        res.Nodes = append(res.Nodes, *foundContact)
     } else {
         closestContacts := FindClosestContacts(k, req.NodeID)
         res.Nodes = ContactsToFoundNodes(closestContacts)
@@ -95,6 +101,7 @@ func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     res.MsgID = CopyID(req.MsgID)
     return nil
 }
+
 // FIND_VALUE
 type FindValueRequest struct {
     Sender Contact
@@ -152,10 +159,12 @@ Shortlist_Loop:
 for {
     //Exit conditions
     if updatedClosestContact == false{
+        fmt.Printf("IFN: exit condition 1\n")
         break Shortlist_Loop
     }
     rpc_nodes := GetAlphaNodesToRPC(shortlist, node_state)
     if len(rpc_nodes) == 0{
+        fmt.Printf("IFN: exit condition 2\n")
         //No more nodes in shortlist to query
         break Shortlist_Loop
     }
@@ -181,25 +190,16 @@ for {
         select {
             case <- timer_chan:
                 //remove contacts that did not respond to RPC from shortlist
-
-                fmt.Printf("shortlist with inactive: %v\n", shortlist)
-                shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
-                fmt.Printf("shortlist without inactive: %v\n", shortlist)
-
-                //Shouldn't care about results in main_chan after the timer runs out
-
-                //Update shortlist
-                //response := <-  main_chan
-                //alpha_contacts := NodesToRPC(node_state, response.Contacts)
-                //shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
+                shortlist = RemoveInactiveContacts(shortlist, node_state)
                 break Alpha_Loop
             case response := <- main_chan:
-                fmt.Printf("%v responds to RPC with %v\n", response.NodeID, response.Contacts)
+                //UPDATE
+                fmt.Printf("%v responds to RPC with %v\n", response.NodeID, FirstBytesOfContactIDs(response.Contacts))
                 node_state[response.NodeID] = "active"
-                //alpha_contacts := NodesToRPC(node_state, response.Contacts)
                 shortlist = UpdateShortlist(shortlist, response.Contacts, req.NodeID, node_state)
-                fmt.Printf("shortlist after adding: %v\n", shortlist)
-                if len(shortlist) > 0{
+                fmt.Printf("shortlist after adding: %v\n", FirstBytesOfContactIDs(shortlist))
+                if len(shortlist) > 0 {
+                    fmt.Printf("closest: %v\nShortlist[0]%v\n", closestNode.NodeID[0], shortlist[0].NodeID[0])
                     if closestNode.NodeID != shortlist[0].NodeID {
                         closestNode = shortlist[0]    
                         updatedClosestContact = true
@@ -207,12 +207,11 @@ for {
                 }
             }
         }
-    //make RPC calls again
     }
-    
-    shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+
+    shortlist = RemoveInactiveContacts(shortlist, node_state)
     shortlist = RemoveNodesToRPC(shortlist, node_state)
-    fmt.Printf("shortlist without un-RPCed: %v\n", shortlist)
+    fmt.Printf("shortlist returned: %v\n", FirstBytesOfContactIDs(shortlist))
     res.Nodes = ContactsToFoundNodes(shortlist)
     res.MsgID = req.MsgID
     res.Err = nil
@@ -223,36 +222,24 @@ for {
     //Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
     
     return nil;
-    
 }
 
-func FindAndRemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
-    for _, contact := range shortlist {
-        if node_state[contact.NodeID] == "inactive" {
-            new_shortlist = RemoveInactiveContact(shortlist, contact, node_state)
-        }
-    }
-    return
-}
 
-func RemoveInactiveContact(shortlist []Contact, contact Contact, node_state map[ID]string) (new_shortlist []Contact) {
-    //remove inactive rpc contact from shortlist
-    if node_state[contact.NodeID]=="inactive" {
-        //remove from shortlist
-        var index int
-        for i, cur_contact := range shortlist {
-            if cur_contact.NodeID == contact.NodeID {
-                index = i
-                break
-            }
+func RemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
+    for _, c := range shortlist {
+        if node_state[c.NodeID] == "inactive"{
+            continue
+        }else{
+            new_shortlist = append(new_shortlist, c)
         }
-        new_shortlist = append(new_shortlist, shortlist[0:index]...)
-        new_shortlist = append(new_shortlist, shortlist[index+1:]...)
-    }
-    return new_shortlist
+   } 
+   return
 }
 
 func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) []Contact {
+    //Adds alpha_contacts to short list.
+    //Remove duplicates or inactive contacts from shortlist.
+    //Then sorts shortlist
     for _, alpha_contact := range alpha_contacts {
         should_add := true
         for _, cur_contact := range shortlist {

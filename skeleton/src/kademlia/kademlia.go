@@ -188,8 +188,8 @@ func Update(k *Kademlia, contact *Contact) error {
 
     bucket := *bucket_addr
     fmt.Printf("Bucket %v length before update: %v\n", bucket_index, len(k.Buckets[bucket_index].Contacts))
-    in_bucket, index:= InBucket(contact, *bucket_addr)
-    is_full := IsFull(bucket)
+    in_bucket, index:= bucket.InBucket(contact)
+    is_full := bucket.IsFull()
     switch {
     case in_bucket:
         /*Move contact to end of bucket's contact list*/
@@ -225,7 +225,7 @@ func Update(k *Kademlia, contact *Contact) error {
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
     }
-    fmt.Printf("After: %v\n", len(k.Buckets[bucket_index].Contacts))
+    fmt.Printf("After update: %v\n", len(k.Buckets[bucket_index].Contacts))
     return errors.New("function not implemented")
 }
 

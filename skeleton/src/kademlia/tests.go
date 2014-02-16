@@ -159,8 +159,8 @@ func TestGetAlphaNodesToRPC(){
     }
 }
 
-func TestRemoveNodesToRPC_FindAndRemoveInactiveContacts(){
-	fmt.Println("\nTESTING: TestRemoveNodesToRPC and FindAndRemoveInactiveContacts\n")
+func TestRemoveNodesToRPC_RemoveInactiveContacts(){
+	fmt.Println("\nTESTING: TestRemoveNodesToRPC and RemoveInactiveContacts\n")
 	//Put nodes that are active, inactive and not in node_list
 	//Should return only active nodes
     node_state := make(map[ID]string)
@@ -175,7 +175,7 @@ func TestRemoveNodesToRPC_FindAndRemoveInactiveContacts(){
     shortlist = append(shortlist, already_contacted[0], already_contacted[1], not_contacted[0], already_contacted[2])
     ref_result := make([]Contact, 0)
     ref_result = append(ref_result, already_contacted[0], already_contacted[2])
-    shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+    shortlist = RemoveInactiveContacts(shortlist, node_state)
     result := RemoveNodesToRPC(shortlist, node_state)
   	strSlice1 := fmt.Sprintf("%v", result)
     strSlice2 := fmt.Sprintf("%v", ref_result)
@@ -254,20 +254,20 @@ func HexDigitToID(hex_digit string, n int) (id ID){
 }
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
-	//TestUpdate(k, 100)
-	//TestStoreAndFindValue(k)
-	//TestGetSetBits()
-	//TestContactsToFoundNodes(k)
-    //TestSortByDistance()
-	//TestFindClosestContacts(k)
+	TestUpdate(k, 100)
+	TestStoreAndFindValue(k)
+	TestGetSetBits()
+	TestContactsToFoundNodes(k)
+    TestSortByDistance()
+	TestFindClosestContacts(k)
 	//TestFindNode(k)
 
 	//Tests where failure leads to exiting program:
-	//TestGetAlphaNodesToRPC()
-	//TestRemoveNodesToRPC_FindAndRemoveInactiveContacts()
+	TestGetAlphaNodesToRPC()
+	TestRemoveNodesToRPC_RemoveInactiveContacts()
 	TestUpdateShortlist(k)
-	TestIterativeFindNode(k)
+	//TestIterativeFindNode(k)
 
-	fmt.Printf("\n\n")
+	fmt.Printf("\n")
 
 }

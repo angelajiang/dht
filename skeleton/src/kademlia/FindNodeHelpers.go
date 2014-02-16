@@ -59,15 +59,20 @@ func PrefixLength(id ID, other ID) (dist int) {
     return
 }
 
+func ContactToFoundNode(c Contact) (f *FoundNode){
+    f = new(FoundNode)
+    f.NodeID = c.NodeID
+    f.Port = c.Port
+    f.IPAddr = c.Host.String()
+    return
+}
+
 func ContactsToFoundNodes(contacts []Contact)(foundNodes []FoundNode){
     //Takes a slice of contacts and transforms it into a slice of foundNodes
     //Output can be stored in a FindNodeResult
     foundNodes = make([]FoundNode, 0)
     for _, contact := range contacts{
-        f := new(FoundNode)
-        f.NodeID = contact.NodeID
-        f.Port = contact.Port
-        f.IPAddr = contact.Host.String()
+        f := ContactToFoundNode(contact)
         foundNodes = append(foundNodes, *f)
     }
     return
