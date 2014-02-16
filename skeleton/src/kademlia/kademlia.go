@@ -194,10 +194,9 @@ func Update(k *Kademlia, contact *Contact) error {
     case in_bucket:
         /*Move contact to end of bucket's contact list*/
         fmt.Printf("Case: in_bucket\n")
-        //TODO: GIVES OUT OF BOUNDS ERROR
-        if len(bucket.Contacts) > 1{
-            bucket.Contacts = append(bucket.Contacts[:index-1],bucket.Contacts[(index+1):]...)
-            bucket.Contacts = append(bucket.Contacts, *contact)
+        //FIXED: GIVES OUT OF BOUNDS ERROR
+        if len(bucket.Contacts) > 1 {
+            bucket.Contacts = MoveToEnd(bucket.Contacts, index)
         }
     case !in_bucket && !is_full:
         if len(bucket_addr.Contacts) == 0{
@@ -228,4 +227,3 @@ func Update(k *Kademlia, contact *Contact) error {
     fmt.Printf("After update: %v\n", len(k.Buckets[bucket_index].Contacts))
     return errors.New("function not implemented")
 }
-
