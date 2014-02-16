@@ -164,13 +164,14 @@ for {
     updatedClosestContact = false
     for _, c := range rpc_nodes {
         fmt.Printf("Sending RPC to %v\n", c.NodeID)
+        cur := c
         go func() {
-            node_state[c.NodeID] = "inactive"
-            main_chan <- FindNodeWithChannel(k, &c, req.NodeID)
+            node_state[cur.NodeID] = "inactive"
+            main_chan <- FindNodeWithChannel(k, &cur, req.NodeID)
         }()
     }
     go func() {
-        time.Sleep(1000 * time.Millisecond)
+        time.Sleep(5000 * time.Millisecond)
         timer_chan <- true
     }()
 
@@ -208,6 +209,7 @@ for {
         }
     //make RPC calls again
     }
+    
     shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
     shortlist = RemoveNodesToRPC(shortlist, node_state)
     fmt.Printf("shortlist without un-RPCed: %v\n", shortlist)

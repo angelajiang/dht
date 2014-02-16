@@ -162,7 +162,7 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_cont
     if err != nil {
           log.Fatal("DialHTTP in FindNode: ", err)
     }
-    fmt.Printf("Client in CallFindNode: %v\n", client)
+    fmt.Printf("Client in CallFindNode\n")
 
     req := new(FindNodeRequest)
     var res FindNodeResult

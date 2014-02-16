@@ -76,7 +76,8 @@ func main() {
                 //test
                 kademlia.TestBasicRPCs(kadem, first_peer_str)
             case "ping":
-                //ping 127.0.0.1:1111
+                //ping 123.12.12.0 1231
+                //ping 1111 --> will ping localhost:1111
                 ping := new(kademlia.Ping)
                 ping.MsgID = kademlia.NewRandomID()
                 ping.Sender.NodeID = kadem.NodeID
@@ -86,15 +87,17 @@ func main() {
                 var pong_from_host kademlia.Pong
                 host_to_ping := cmdline_args[1]
                 if strings.Contains(host_to_ping, ":") {
-                    listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
-                    pong_from_host, err = kademlia.CallPing(kadem,listen_netip, peer_uint16)
-                    if err != nil {
-                        log.Fatal("ReadLine failed: ", cmd_err)
-                    }
-
-                    log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
                 } else {
+                    //If only port given, host is localhost
+                    s := []string{"localhost:", host_to_ping}
+                    host_to_ping = strings.Join(s, "") 
                 }
+                listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
+                pong_from_host, err = kademlia.CallPing(kadem,listen_netip, peer_uint16)
+                if err != nil {
+                    log.Fatal("ReadLine failed: ", cmd_err)
+                }
+                log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
             case "whoami":
                 fmt.Printf("%v\n", kadem.NodeID)
             case "local_find_value":
