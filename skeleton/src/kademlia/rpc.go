@@ -132,7 +132,6 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
 }
 
 func IterativeFindNode(k *Kademlia, req FindNodeRequest, res *FindNodeResult) (err error) {
-
     
     //1. FindClosestContacts -> this returns 3 closest nodes.
     closestContacts := FindClosestContacts(k, req.NodeID)
@@ -180,7 +179,7 @@ for {
         }()
     }
     go func() {
-        time.Sleep(5000 * time.Millisecond)
+        time.Sleep(1000 * time.Millisecond)
         timer_chan <- true
     }()
 

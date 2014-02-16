@@ -1,3 +1,17 @@
+---------------------------------------------------------------------------------
+TODO:
+
+Update
+    Fix edge cases in Update
+    Look into issue of printing "after" twice in one call to update
+Call Update in iterative functions
+Write function to return up to alpha closest contact in short list
+Command line cases 
+IterativeFindValue
+IterativeStore
+Test with reference implementation
+
+---------------------------------------------------------------------------------
 TESTING:
 
 IterativeFindNode:
