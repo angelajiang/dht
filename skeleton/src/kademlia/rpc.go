@@ -8,6 +8,7 @@ import (
     "fmt"
     "sort"
     "time"
+    "errors"
 )
 
 
@@ -123,7 +124,7 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     return nil
 }
 
-func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) error {
+func IterativeFindNode(k *Kademlia, req FindNodeRequest, res *FindNodeResult) (err error) {
 
     
     //1. FindClosestContacts -> this returns 3 closest nodes.
@@ -134,6 +135,10 @@ func  (k *Kademlia) IterativeFindNode(req FindNodeRequest, res *FindNodeResult) 
     ds.NodeID = req.NodeID
     sort.Sort(ds)
     shortlist := ds.Contacts
+    if len(closestContacts) == 0{
+        err = errors.New("No contacts to send initial RPCs to.")
+        return
+    }
     closestNode := shortlist[0]
     updatedClosestContact := true
 
@@ -147,7 +152,6 @@ Shortlist_Loop:
 for {
     //Exit conditions
     if updatedClosestContact == false{
-        //RPC calls did not return any contacts closer than current closest node
         break Shortlist_Loop
     }
     rpc_nodes := GetAlphaNodesToRPC(shortlist, node_state)
@@ -159,13 +163,14 @@ for {
     //Did not exit. Start another iteration of sending alpha RPCs
     updatedClosestContact = false
     for _, c := range rpc_nodes {
+        fmt.Printf("Sending RPC to %v\n", c.NodeID)
         go func() {
             node_state[c.NodeID] = "inactive"
             main_chan <- FindNodeWithChannel(k, &c, req.NodeID)
         }()
     }
     go func() {
-        time.Sleep(300 * time.Millisecond)
+        time.Sleep(1000 * time.Millisecond)
         timer_chan <- true
     }()
 
@@ -175,7 +180,10 @@ for {
         select {
             case <- timer_chan:
                 //remove contacts that did not respond to RPC from shortlist
+
+                fmt.Printf("shortlist with inactive: %v\n", shortlist)
                 shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
+                fmt.Printf("shortlist without inactive: %v\n", shortlist)
 
                 //Shouldn't care about results in main_chan after the timer runs out
 
@@ -185,12 +193,16 @@ for {
                 //shortlist = UpdateShortlist(shortlist, alpha_contacts, req.NodeID, node_state)
                 break Alpha_Loop
             case response := <- main_chan:
+                fmt.Printf("%v responds to RPC with %v\n", response.NodeID, response.Contacts)
                 node_state[response.NodeID] = "active"
                 //alpha_contacts := NodesToRPC(node_state, response.Contacts)
                 shortlist = UpdateShortlist(shortlist, response.Contacts, req.NodeID, node_state)
-                if closestNode.NodeID != shortlist[0].NodeID {
-                    closestNode = shortlist[0]    
-                    updatedClosestContact = true
+                fmt.Printf("shortlist after adding: %v\n", shortlist)
+                if len(shortlist) > 0{
+                    if closestNode.NodeID != shortlist[0].NodeID {
+                        closestNode = shortlist[0]    
+                        updatedClosestContact = true
+                    }
                 }
             }
         }
@@ -198,8 +210,9 @@ for {
     }
     shortlist = FindAndRemoveInactiveContacts(shortlist, node_state)
     shortlist = RemoveNodesToRPC(shortlist, node_state)
+    fmt.Printf("shortlist without un-RPCed: %v\n", shortlist)
     res.Nodes = ContactsToFoundNodes(shortlist)
-    res.MsgID = ds.NodeID
+    res.MsgID = req.MsgID
     res.Err = nil
 
     //UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist

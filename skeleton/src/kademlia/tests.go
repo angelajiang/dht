@@ -231,14 +231,16 @@ func TestIterativeFindNode(k *Kademlia)(sorted_ids []ID){
        ids = append(ids, HexDigitToID(d, 20)) 
     }
     k_id := HexDigitToID("f", 20)
+    k_id = k.NodeID 
 
     idsort := new(IDSorter)
     idsort.IDs = ids
     idsort.NodeID = k_id
     sort.Sort(idsort)
     sorted_ids = idsort.IDs
-
-    fmt.Printf("Sorted by distance to nodeid %v:\n%A", k_id[0], FirstBytesOfIDs(sorted_ids))
+    fmt.Printf("Sorted by distance to k.NodeID %v:\n%v\n", k_id, FirstBytesOfIDs(sorted_ids))
+    //Sorted by distance to F: [F 7 B 3 1 5 9 D E A 2 C 8 6 4] 
+    //[255 119 187 51 17 85 153 221 238 170 34 204 136 102 68]
 
 	return
 }
@@ -256,7 +258,7 @@ func TestBasicRPCs(k *Kademlia, first_peer_str string){
 	//TestStoreAndFindValue(k)
 	//TestGetSetBits()
 	//TestContactsToFoundNodes(k)
-	TestSortByDistance()
+    //TestSortByDistance()
 	//TestFindClosestContacts(k)
 	//TestFindNode(k)
 

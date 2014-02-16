@@ -1,0 +1,13 @@
+TESTING:
+
+IterativeFindNode:
+Command: ifn <single hex digit to form ID>
+         ex) "ifn F" calls IterativeFindNode on ID [FF FF FF ...]
+Setup:
+1) Open multiple instances of Kademlia
+2) run command "setid <single hex digit to form ID>" for each instance
+3) Add contact(s) to each instance by pinging ports of other instances
+4) Run ifn command from one instance to another, preferably one far away
+    ex) Node [FF FF FF ...] runs "ifn 1"
+5) Should return the closest nodes that have a path from the contact lists
+   starting at the sending instance

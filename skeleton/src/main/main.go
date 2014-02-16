@@ -30,12 +30,17 @@ func main() {
         log.Fatal("Must be invoked with exactly two arguments!\n")
     }
     listen_str := args[0]
-    //first_peer_str := args[1]
+    first_peer_str := args[1]
 
     fmt.Printf("kademlia starting up!\n")
     host, port := kademlia.PeerStrToHostPort(listen_str)
     //fmt.Printf("host: %v\n", host)
-    //fmt.Printf("port: %v\n", port)
+
+    //FOR DEBUGGING!!!!
+    port = uint16(kademlia.Random(4000,5000))
+    fmt.Printf("port: %v\n", port)
+    listen_str = kademlia.HostPortToPeerStr(host, port)
+
     kadem := kademlia.NewKademlia(host, port)
     //fmt.Printf("kadem NodeID: %v\n", kadem.NodeID)
     rpc.Register(kadem)
@@ -45,12 +50,11 @@ func main() {
         log.Fatal("Listen: ", err)
     }
 
+    //kademlia.TestPingFirstPeer(kadem, first_peer_str)
+
     // Serve forever.
     go http.Serve(l, nil)
 
-    //Testing
-    //kademlia.TestPingFirstPeer(kadem, first_peer_str)
-    //kademlia.TestBasicRPCs(kadem, first_peer_str)
 
     /* looping forever, reading from stdin */
     for {
@@ -64,7 +68,15 @@ func main() {
         cmdline_args := strings.Split(cmdline, " ")
         command := cmdline_args[0]
         switch command {
+            case "setid":
+                //setid f
+                d := string(cmdline_args[1])
+                kadem.NodeID = kademlia.HexDigitToID(d, 20)
+            case "test":
+                //test
+                kademlia.TestBasicRPCs(kadem, first_peer_str)
             case "ping":
+                //ping 127.0.0.1:1111
                 ping := new(kademlia.Ping)
                 ping.MsgID = kademlia.NewRandomID()
                 ping.Sender.NodeID = kadem.NodeID
@@ -75,7 +87,11 @@ func main() {
                 host_to_ping := cmdline_args[1]
                 if strings.Contains(host_to_ping, ":") {
                     listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
-                    pong_from_host, err = kademlia.CallPing(listen_netip, peer_uint16)
+                    pong_from_host, err = kademlia.CallPing(kadem,listen_netip, peer_uint16)
+                    if err != nil {
+                        log.Fatal("ReadLine failed: ", cmd_err)
+                    }
+
                     log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
                 } else {
                 }
@@ -99,6 +115,12 @@ func main() {
                     kademlia.FindContactLocally(kadem, id)
                 }
             case "store":
+                /* for testing
+                key_digit := string(cmdline_args[1])
+                key := kademlia.HexDigitToID(key_digit, 20)
+                val := []byte(cmdline_args[2])
+                */
+
                 /*
                 node_id := []byte(cmdline_args[1])
                 key := []byte(cmdline_args[2])
@@ -131,6 +153,7 @@ func main() {
                 val := []byte(cmdline_args[2])
                 */
             case "iterativeFindNode":
+
                 /*
                 node_id := []byte(cmdline_args[1])
                 */
@@ -138,6 +161,23 @@ func main() {
                 /*
                 key := []byte(cmdline_args[1])
                 */
+
+            case "ifn":
+                //ifn f
+
+                req := new(kademlia.FindNodeRequest)
+                req.Sender = kadem.KContact
+                req.MsgID = kademlia.NewRandomID()
+                d := string(cmdline_args[1])
+                req.NodeID = kademlia.HexDigitToID(d, 20)
+                res := new(kademlia.FindNodeResult)
+
+                err := kademlia.IterativeFindNode(kadem, *req, res)
+                if err != nil {
+                    log.Fatal("IterativeFindNode failed: %v\n", err)
+                }
+                fmt.Printf("FindNodeResult: %v\n", res.Nodes)
+
         }
     }
 }

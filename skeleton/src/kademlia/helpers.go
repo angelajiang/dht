@@ -117,13 +117,13 @@ func GetBucketIndex(distance ID)(index int){
     
 //TESTING HELPERS
 
-func random(min, max int) int {
+func Random(min, max int) int {
     rand.Seed(time.Now().UnixNano())
     return rand.Intn(max - min) + min
 }
 
 func NewRandomContact()(*Contact){
-    port := uint16(random(4000,5000))
+    port := uint16(Random(4000,5000))
     ip := net.ParseIP("127.0.0.1")
     nodeid := NewRandomID()
     return &Contact{nodeid, ip, port}
