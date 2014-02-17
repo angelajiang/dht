@@ -11,7 +11,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 20
+const NUMCONTACTS int = 2
 const VALUESIZE int = 160
 const ALPHA int = 3
 

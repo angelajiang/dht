@@ -119,28 +119,19 @@ func main() {
                     kademlia.FindContactLocally(kadem, id)
                 }
             case "store":
-                /* for testing
-                key_digit := string(cmdline_args[1])
-                key := kademlia.HexDigitToID(key_digit, 20)
-                val := []byte(cmdline_args[2])
-                */
-
-                /*
-                node_id := []byte(cmdline_args[1])
+                node_id_array := []byte(cmdline_args[1])
+                node_id, err := FromByteArray(node_id_array)
                 key := []byte(cmdline_args[2])
                 val := []byte(cmdline_args[2])
-                
-                TODO: write a function that returns a contact from the node_id
-                contact := kademlia.FindNodeFromNodeID(node_id)
-                contact := new(Contact)
-                contact.NodeID = node_id
-                //contact.Port =
-                //contact.Host = 
-                err := kademlia.CallStore(contact, key, val)
+                contact, err := kademlia.FindContactLocally(kadem, node_id)
                 if err != nil {
-                    fmt.Printf("error storing value\n")
+                    //IterativeStore
+                } else {
+                    err := kademlia.CallStore(contact, key, val)
+                    if err != nil {
+                        fmt.Printf("error storing value\n")
+                    }
                 }
-                */
             case "find_node":
                 /*
                 node_id := []byte(cmdline_args[1])
