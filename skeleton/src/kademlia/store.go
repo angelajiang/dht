@@ -6,6 +6,7 @@ package kademlia
 import (
 	"net/rpc"
 	"log"
+	"errors"
 )
 
 // STORE
@@ -59,10 +60,19 @@ func CallStore(remote_contact *Contact, Key ID, Value []byte) error {
     return nil
 }
 
-/*
-func IterativeStore(k *Kademlia, Key ID, Value []byte){
-	nodes, err := IterativeFindNode(k, Key)
-
-
+func IterativeStore(k *Kademlia, key ID, value []byte) (contactsReached []Contact, err error) {
+	contacts, err := IterativeFindNode(k, key)
+	if err != nil {
+		contactsReached = make([]Contact, 0)		//IFN returns error if nodes is empty
+		return
+	}
+	for _,c := range contacts{
+		err = CallStore(&c, key, value)
+		if err == nil{
+			contactsReached = append(contactsReached, c)
+		}else{
+			err = errors.New("Error in IterativeStore: One or more contacts did not store the value\n")
+		}
+	}
+	return
 }
-*/

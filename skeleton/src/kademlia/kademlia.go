@@ -75,36 +75,6 @@ func FindValueLocally(k *Kademlia, Key ID) error {
     return nil
 }
 
-func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
-    /* CallPing should probably take a Kademlia object here */
-    //TODO: run the Update function?
-    peer_str := HostPortToPeerStr(remote_host, port)
-    fmt.Printf("peer_str for ping: %v\n", peer_str)
-    client, err := rpc.DialHTTP("tcp", peer_str)
-    if err != nil {
-          log.Fatal("Call: ", err)
-    }
-
-    fmt.Printf("Making Ping struct\n")
-    ping := new(Ping)
-    ping.MsgID = NewRandomID()
-    ping.Sender = k.KContact
-
-    var pong Pong
-    err = client.Call("Kademlia.Ping", ping, &pong)
-    if err != nil {
-        err = errors.New("Call: No resonse from ping")
-          //log.Fatal("Call: ", err)
-    } else {
-        fmt.Printf("Calling Update From Ping!\n")
-        defer client.Close()
-        fmt.Printf("pong sender NodeID: %v\n", pong.Sender.NodeID)
-        Update(k, &pong.Sender)
-        
-    }
-    return pong, err
-}
-
 func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult, error){
     //Set up client.
     peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
@@ -155,6 +125,35 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_cont
    return res.Nodes, nil
 }
 
+func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
+    /* CallPing should probably take a Kademlia object here */
+    //TODO: run the Update function?
+    peer_str := HostPortToPeerStr(remote_host, port)
+    fmt.Printf("peer_str for ping: %v\n", peer_str)
+    client, err := rpc.DialHTTP("tcp", peer_str)
+    if err != nil {
+          log.Fatal("Call: ", err)
+    }
+
+    fmt.Printf("Making Ping struct\n")
+    ping := new(Ping)
+    ping.MsgID = NewRandomID()
+    ping.Sender = k.KContact
+
+    var pong Pong
+    err = client.Call("Kademlia.Ping", ping, &pong)
+    if err != nil {
+        err = errors.New("Call: No resonse from ping")
+          //log.Fatal("Call: ", err)
+    } else {
+        fmt.Printf("Calling Update From Ping!\n")
+        defer client.Close()
+        Update(k, &pong.Sender)
+    }
+
+    return pong, err
+}
+
 
 func Update(k *Kademlia, contact *Contact) error {
     //Choose correct bucket to put contact
@@ -178,8 +177,8 @@ func Update(k *Kademlia, contact *Contact) error {
             bucket.Contacts = MoveToEnd(bucket.Contacts, index)
         }
     case !in_bucket && !is_full:
-            fmt.Printf("Case: !in_bucket, !is_full\n")
-            bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
+        fmt.Printf("Case: !in_bucket, !is_full\n")
+        bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/

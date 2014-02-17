@@ -5,7 +5,6 @@ import (
 	"net/rpc"
 	"fmt"
 	"sort"
-    "strings"
 )
 
 func TestPingFirstPeer(k *Kademlia, first_peer_str string){
@@ -243,14 +242,6 @@ func TestIterativeFindNode(k *Kademlia)(sorted_ids []ID){
     //[255 119 187 51 17 85 153 221 238 170 34 204 136 102 68]
 
 	return
-}
-
-func HexDigitToID(hex_digit string, n int) (id ID){
-    //Takes hex number of all digits as "digit"
-    //returns number as n-byte id
-    //HexDigitToID(f,160) -> ffff....ffff to byte array of size 160
-    id, _ = FromString(strings.Repeat(hex_digit, n*2))
-    return
 }
 
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
