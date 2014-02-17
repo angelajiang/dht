@@ -11,7 +11,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 20
+const NUMCONTACTS int = 2
 const VALUESIZE int = 160
 const ALPHA int = 3
 
@@ -72,10 +72,11 @@ func Update(k *Kademlia, contact *Contact) error {
     case !in_bucket && is_full:
         //fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        fmt.Printf("Ping'd Contact. Host: %v, Port: %v\n",
+        fmt.Printf("Ping'd Contact Host: %v, Port: %v\n",
         bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
-        pong, err := CallPing(k, bucket_addr.Contacts[0].Host,
-        bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
+        fmt.Printf("Ping'd Contact NodeID: %v\n",
+        bucket_addr.Contacts[0].NodeID)
+        pong, err := CallPing(k, bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
         if err != nil {
             //drop head and append contact to end of list
