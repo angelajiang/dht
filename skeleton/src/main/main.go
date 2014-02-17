@@ -148,10 +148,13 @@ func main() {
                     kademlia.FindValueLocally(kadem, key)
                 }
             case "iterativeStore":
-                /*
-                key := []byte(cmdline_args[1])
+                key, err := kademlia.FromString(cmdline_args[1])
                 val := []byte(cmdline_args[2])
-                */
+                storedIn, err := kademlia.IterativeStore(kadem, key, val)
+                if err != nil{
+                    log.Printf("%v\n", err)
+                }
+                fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1].NodeID)
             case "iterativeFindNode":
                 node_id, err := kademlia.FromString(cmdline_args[1])
                 closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
