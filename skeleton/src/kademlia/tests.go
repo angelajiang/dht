@@ -223,41 +223,87 @@ func TestUpdateShortlist(k *Kademlia){
     }
 }
 
-func TestIterativeFindNode(k *Kademlia)(sorted_ids []ID){
+func TestSorters(k *Kademlia, sortBy string)(){
     ids := make([]ID, 0)
     hex_digits := [15]string {"1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
     for _,d := range hex_digits{
        ids = append(ids, HexDigitToID(d, 20)) 
     }
-    k_id := HexDigitToID("f", 20)
-    k_id = k.NodeID 
+    contacts := make([]Contact, 0)
+    for _,id := range ids {
+        c := new(Contact)
+        c.NodeID = id
+        contacts = append(contacts, *c)
+    }
+    k_id := HexDigitToID(sortBy, 20)
+    //k_id = k.NodeID 
 
     idsort := new(IDSorter)
     idsort.IDs = ids
     idsort.NodeID = k_id
     sort.Sort(idsort)
-    sorted_ids = idsort.IDs
-    fmt.Printf("Sorted by distance to k.NodeID %v:\n%v\n", k_id, FirstBytesOfIDs(sorted_ids))
+    sorted_ids := idsort.IDs
+
+    contacts = SortContacts(contacts, k_id)
+
+    sortedByIDs := fmt.Sprintf("%v", FirstBytesOfIDs(sorted_ids))
+    sortedByContacts := fmt.Sprintf("%v", FirstBytesOfContactIDs(contacts))
+        fmt.Printf("Sorted by IDs to k_id %v:\n%v\n", k_id[0], FirstBytesOfIDs(sorted_ids))
+        fmt.Printf("Sorted by Contacts: %v\n", FirstBytesOfContactIDs(contacts))
+    if sortedByContacts != sortedByIDs {
+        fmt.Printf("Sorted by IDs to k_id %v:\n%v\n", k_id[0], FirstBytesOfIDs(sorted_ids))
+        fmt.Printf("Sorted by Contacts: %v\n", FirstBytesOfContactIDs(contacts))
+        log.Fatal("TestSorters: FAILED\n")
+
+    }
+
     //Sorted by distance to F: [F 7 B 3 1 5 9 D E A 2 C 8 6 4] 
     //[255 119 187 51 17 85 153 221 238 170 34 204 136 102 68]
 
 	return
 }
 
+func GetDistanceForTesting(sortBy string){
+    ids := make([]ID, 0)
+    hex_digits := [15]string {"1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
+    for _,d := range hex_digits{
+       ids = append(ids, HexDigitToID(d, 20)) 
+    }
+    contacts := make([]Contact, 0)
+    for _,id := range ids {
+        c := new(Contact)
+        c.NodeID = id
+        contacts = append(contacts, *c)
+    }
+    k_id := HexDigitToID(sortBy, 20)
+    contacts = SortContacts(contacts, k_id)
+        
+    fmt.Printf("Sorted by distance to %v\n", k_id[0])
+
+    for _,c := range contacts{
+        firstByte := c.NodeID[0]
+        distance := c.NodeID.Xor(k_id)
+        pLen := distance.PrefixLen()
+        fmt.Printf("firstByte: %v, pLen: %v\n", firstByte, pLen)
+    }
+    
+}
+
 func TestBasicRPCs(k *Kademlia, first_peer_str string){
-	TestUpdate(k, 100)
-	TestStoreAndFindValue(k)
-	TestGetSetBits()
-	TestContactsToFoundNodes(k)
-    TestSortByDistance()
-	TestFindClosestContacts(k)
+	//TestUpdate(k, 100)
+	//TestStoreAndFindValue(k)
+	//TestGetSetBits()
+	//TestContactsToFoundNodes(k)
+    //TestSortByDistance()
+	//TestFindClosestContacts(k)
 	//TestFindNode(k)
 
 	//Tests where failure leads to exiting program:
-	TestGetAlphaNodesToRPC()
-	TestRemoveNodesToRPC_RemoveInactiveContacts()
-	TestUpdateShortlist(k)
-	//TestIterativeFindNode(k)
+	//TestGetAlphaNodesToRPC()
+	//TestRemoveNodesToRPC_RemoveInactiveContacts()
+	//TestUpdateShortlist(k)
+    //TestSorters(k, "f")
+    GetDistanceForTesting("f")
 
 	fmt.Printf("\n")
 

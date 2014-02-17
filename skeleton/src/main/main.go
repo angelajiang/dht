@@ -184,7 +184,22 @@ func main() {
                 if err != nil {
                     log.Fatal("IterativeFindNode failed:\n", err)
                 }
-                fmt.Printf("Closest alpha contacts: %v\n", closestContacts)
+                fmt.Printf("Closest alpha contacts: %v\n", kademlia.FirstBytesOfContactIDs(closestContacts))
+
+            case "ifv":
+                //ifv f f
+                if len(cmdline_args) != 3 {
+                    log.Printf("Error: Wrong number of arguments calling ifn. Expected 3, got %v\n", len(cmdline_args))
+                    break
+                }
+                d := string(cmdline_args[1])
+                key := kademlia.HexDigitToID(d, 20)
+                retID, foundValue, err := kademlia.IterativeFindValue(kadem, key)
+                if err != nil{
+                    fmt.Printf("%v\n", err)
+                    break
+                }
+                fmt.Printf("%v %v\n", retID, foundValue)
 
             case "test_update":
                 kademlia.TestUpdate(kadem, 3)

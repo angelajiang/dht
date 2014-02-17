@@ -45,7 +45,7 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
           log.Fatal("Call: ", err)
     }
 
-    fmt.Printf("Making Ping struct\n")
+    //fmt.Printf("Making Ping struct\n")
     ping := new(Ping)
     ping.MsgID = NewRandomID()
     ping.Sender = k.GetContact()
@@ -56,7 +56,7 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
         err = errors.New("Call: No resonse from ping")
           //log.Fatal("Call: ", err)
     } else {
-        fmt.Printf("Calling Update From Ping!\n")
+        //fmt.Printf("Calling Update From Ping!\n")
         Update(k, &pong.Sender)
     }
 
