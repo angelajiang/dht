@@ -13,7 +13,7 @@ import (
 )
 
 const NUMBUCKETS int =  160
-const NUMCONTACTS int = 100
+const NUMCONTACTS int = 20
 const VALUESIZE int = 160
 const ALPHA int = 3
 
@@ -99,7 +99,6 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
         fmt.Printf("Calling Update From Ping!\n")
         Update(k, &pong.Sender)
     }
-
     client.Close()
     return pong, err
 }
@@ -158,6 +157,7 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_cont
 func Update(k *Kademlia, contact *Contact) error {
     //Choose correct bucket to put contact
     fmt.Printf("\nContact used in update: %v\n", contact.NodeID)
+    fmt.Printf("New Contact Host: %v, Port: %v\n", contact.Host, contact.Port)
     distance := k.NodeID.Xor(contact.NodeID)
     bucket_index := GetBucketIndex(distance)
     fmt.Printf("Adding to Bucket %v\n", bucket_index)
@@ -165,7 +165,7 @@ func Update(k *Kademlia, contact *Contact) error {
     bucket := *bucket_addr
     
     fmt.Printf("len(Bucket %v) before update: %v\n", bucket_index, len(k.Buckets[bucket_index].Contacts))
-    in_bucket, index:= bucket_addr.InBucket(contact)
+    in_bucket, index := bucket_addr.InBucket(contact)
     is_full := bucket_addr.IsFull()
     switch {
     case in_bucket:
@@ -181,6 +181,8 @@ func Update(k *Kademlia, contact *Contact) error {
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
+        fmt.Printf("Ping'd Contact. Host: %v, Port: %v\n",
+        bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
         pong, err := CallPing(k, bucket_addr.Contacts[0].Host,
         bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
