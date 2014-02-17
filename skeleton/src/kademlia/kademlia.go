@@ -76,13 +76,16 @@ func FindValueLocally(k *Kademlia, Key ID) error {
 }
 
 func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
-    /* DoPing should probably take a Kademlia object here */
+    /* CallPing should probably take a Kademlia object here */
     //TODO: run the Update function?
     peer_str := HostPortToPeerStr(remote_host, port)
+    fmt.Printf("peer_str for ping: %v\n", peer_str)
     client, err := rpc.DialHTTP("tcp", peer_str)
     if err != nil {
           log.Fatal("Call: ", err)
     }
+
+    fmt.Printf("Making Ping struct\n")
     ping := new(Ping)
     ping.MsgID = NewRandomID()
     ping.Sender = k.KContact
@@ -92,9 +95,12 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
     if err != nil {
         err = errors.New("Call: No resonse from ping")
           //log.Fatal("Call: ", err)
-    }else{
+    } else {
+        fmt.Printf("Calling Update From Ping!\n")
         Update(k, &pong.Sender)
     }
+
+    client.Close()
     return pong, err
 }
 
@@ -151,14 +157,16 @@ func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_cont
 
 func Update(k *Kademlia, contact *Contact) error {
     //Choose correct bucket to put contact
+    fmt.Printf("\nContact used in update: %v\n", contact.NodeID)
     distance := k.NodeID.Xor(contact.NodeID)
     bucket_index := GetBucketIndex(distance)
+    fmt.Printf("Adding to Bucket %v\n", bucket_index)
     bucket_addr := &k.Buckets[bucket_index]
-
     bucket := *bucket_addr
-    fmt.Printf("Bucket %v length before update: %v\n", bucket_index, len(k.Buckets[bucket_index].Contacts))
-    in_bucket, index:= bucket.InBucket(contact)
-    is_full := bucket.IsFull()
+    
+    fmt.Printf("len(Bucket %v) before update: %v\n", bucket_index, len(k.Buckets[bucket_index].Contacts))
+    in_bucket, index:= bucket_addr.InBucket(contact)
+    is_full := bucket_addr.IsFull()
     switch {
     case in_bucket:
         /*Move contact to end of bucket's contact list*/
@@ -168,31 +176,23 @@ func Update(k *Kademlia, contact *Contact) error {
             bucket.Contacts = MoveToEnd(bucket.Contacts, index)
         }
     case !in_bucket && !is_full:
-        if len(bucket_addr.Contacts) == 0{
-            fmt.Printf("Case: !in_bucket, !is_full, empty\n")
+            fmt.Printf("Case: !in_bucket, !is_full\n")
             bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
-        } else {
-            fmt.Printf("Case: !in_bucket, !is_full, !empty\n")
-            pong, err := CallPing(k, bucket_addr.Contacts[0].Host, k.Port)//bucket_addr.Contacts[0].Port)
-            fmt.Printf("%+v\n", pong)
-            if err != nil{
-                bucket_addr.Contacts = append(bucket_addr.Contacts[1:], *contact)
-            }
-            bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
-        }
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        pong, err := CallPing(k, bucket_addr.Contacts[0].Host, k.Port)//bucket_addr.Contacts[0].Port)
+        pong, err := CallPing(k, bucket_addr.Contacts[0].Host,
+        bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
-        if err != nil{
-            //drop head append contact to end of list
+        if err != nil {
+            //drop head and append contact to end of list
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:], *contact)
         } else {
             //Move head to tail
             bucket_addr.Contacts = append(bucket_addr.Contacts[1:],bucket_addr.Contacts[0])
         }
     }
-    fmt.Printf("After update: %v\n", len(k.Buckets[bucket_index].Contacts))
+    fmt.Printf("len(Bucket %v) After update: %v\n",
+    bucket_index, len(k.Buckets[bucket_index].Contacts))
     return errors.New("function not implemented")
 }

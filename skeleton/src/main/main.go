@@ -37,10 +37,10 @@ func main() {
     //fmt.Printf("host: %v\n", host)
 
     //FOR DEBUGGING!!!!
-    port = uint16(kademlia.Random(4000,5000))
-    fmt.Printf("port: %v\n", port)
+   // port = uint16(kademlia.Random(4000,5000))
+   // fmt.Printf("port: %v\n", port)
     listen_str = kademlia.HostPortToPeerStr(host, port)
-
+    
     kadem := kademlia.NewKademlia(host, port)
     //fmt.Printf("kadem NodeID: %v\n", kadem.NodeID)
     rpc.Register(kadem)
@@ -49,7 +49,7 @@ func main() {
     if err != nil {
         log.Fatal("Listen: ", err)
     }
-
+    //kademlia.TestUpdate(kadem, 6)
     //kademlia.TestPingFirstPeer(kadem, first_peer_str)
 
     // Serve forever.
@@ -167,16 +167,21 @@ func main() {
 
             case "ifn":
                 //ifn f
-
+                if len(cmdline_args) != 2 {
+                    log.Printf("Error: Wrong number of arguments calling ifn. Expected 2, got %v\n", len(cmdline_args))
+                    break
+                }
                 d := string(cmdline_args[1])
                 destID := kademlia.HexDigitToID(d, 20)
 
                 closestContacts, err := kademlia.IterativeFindNode(kadem, destID)
                 if err != nil {
-                    log.Fatal("IterativeFindNode failed: %v\n", err)
+                    log.Fatal("IterativeFindNode failed:\n", err)
                 }
                 fmt.Printf("Closest alpha contacts: %v\n", closestContacts)
 
+            case "test_update":
+                kademlia.TestUpdate(kadem, 3)
         }
     }
 }
