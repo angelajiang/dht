@@ -61,16 +61,16 @@ func Update(k *Kademlia, contact *Contact) error {
     switch {
     case in_bucket:
         /*Move contact to end of bucket's contact list*/
-        fmt.Printf("Case: in_bucket\n")
+        //fmt.Printf("Case: in_bucket\n")
         //FIXED: GIVES OUT OF BOUNDS ERROR
         if len(bucket.Contacts) > 1 {
             bucket.Contacts = MoveToEnd(bucket.Contacts, index)
         }
     case !in_bucket && !is_full:
-        fmt.Printf("Case: !in_bucket, !is_full\n")
+        //fmt.Printf("Case: !in_bucket, !is_full\n")
         bucket_addr.Contacts = append(bucket_addr.Contacts, *contact)
     case !in_bucket && is_full:
-        fmt.Printf("Case: !in_bucket and is_full\n")
+        //fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
         fmt.Printf("Ping'd Contact. Host: %v, Port: %v\n",
         bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
