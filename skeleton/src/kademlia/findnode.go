@@ -130,7 +130,10 @@ func IterativeFindNode(k *Kademlia, destID ID) (closestContacts []Contact, err e
 
                     break Alpha_Loop
                 case response := <- main_chan:
-                    //UPDATE
+                	for _,c := range response.Contacts{
+                		cur := c
+					    Update(k, &cur)
+                	}
                     fmt.Printf("%v responds to RPC with %v\n", response.NodeID[0], FirstBytesOfContactIDs(response.Contacts))
                     node_state[response.NodeID] = "active"
                     shortlist = UpdateShortlist(shortlist, response.Contacts, destID, node_state)
