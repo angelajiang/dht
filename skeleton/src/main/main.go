@@ -122,6 +122,10 @@ func main() {
                     kademlia.FindContactLocally(kadem, node_id)
                 }
             case "store":
+                if len(cmdline_args) != 4 {
+                    log.Printf("Error: Wrong number of arguments calling store. Expected 4, got %v\n", len(cmdline_args))
+                    break
+                }
                 node_id, err := kademlia.FromString(cmdline_args[1])
                 key, err := kademlia.FromString(cmdline_args[2])
                 val := []byte(cmdline_args[3])
@@ -176,6 +180,10 @@ func main() {
                     }
                 }
             case "iterativeStore":
+                if len(cmdline_args) != 4 {
+                    log.Printf("Error: Wrong number of arguments calling iterativeStore. Expected 4, got %v\n", len(cmdline_args))
+                    break
+                }
                 key, err := kademlia.FromString(cmdline_args[1])
                 val := []byte(cmdline_args[2])
                 storedIn, err := kademlia.IterativeStore(kadem, key, val)
@@ -185,6 +193,10 @@ func main() {
                 }
                 fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1].NodeID)
             case "iterativeFindNode":
+                if len(cmdline_args) != 2 {
+                    log.Printf("Error: Wrong number of arguments calling iterativeFindNode. Expected 2, got %v\n", len(cmdline_args))
+                    break
+                }
                 node_id, err := kademlia.FromString(cmdline_args[1])
                 closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
                 if err != nil {
@@ -195,6 +207,7 @@ func main() {
                     fmt.Printf("Contact %v ID: %v\n", i, contact.NodeID)
                 }
             case "iterativeFindValue":
+                //iterativeFindValue key(ID)
                 key, err := kademlia.FromString(cmdline_args[1])
                 retID, foundValue, err := kademlia.IterativeFindValue(kadem, key)
                 if err != nil{
