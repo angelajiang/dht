@@ -168,18 +168,14 @@ func main() {
             case "ifn":
                 //ifn f
 
-                req := new(kademlia.FindNodeRequest)
-                req.Sender = kadem.KContact
-                req.MsgID = kademlia.NewRandomID()
                 d := string(cmdline_args[1])
-                req.NodeID = kademlia.HexDigitToID(d, 20)
-                res := new(kademlia.FindNodeResult)
+                destID := kademlia.HexDigitToID(d, 20)
 
-                err := kademlia.IterativeFindNode(kadem, *req, res)
+                closestContacts, err := kademlia.IterativeFindNode(kadem, destID)
                 if err != nil {
                     log.Fatal("IterativeFindNode failed: %v\n", err)
                 }
-                fmt.Printf("FindNodeResult: %v\n", res.Nodes)
+                fmt.Printf("Closest alpha contacts: %v\n", closestContacts)
 
         }
     }

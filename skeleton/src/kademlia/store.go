@@ -4,11 +4,8 @@ package kademlia
 // other groups' code.
 
 import (
-    "net"
-    "fmt"
-    "sort"
-    "time"
-    "errors"
+	"net/rpc"
+	"log"
 )
 
 // STORE
@@ -61,3 +58,11 @@ func CallStore(remote_contact *Contact, Key ID, Value []byte) error {
 
     return nil
 }
+
+/*
+func IterativeStore(k *Kademlia, Key ID, Value []byte){
+	nodes, err := IterativeFindNode(k, Key)
+
+
+}
+*/

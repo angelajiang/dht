@@ -18,7 +18,6 @@ type Contact struct {
     Port uint16
 }
 
-// PING
 type Ping struct {
     Sender Contact
     MsgID ID
@@ -108,14 +107,14 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     return nil
 }
 
-func IterativeFindNode(k *Kademlia, req FindNodeRequest, res *FindNodeResult) (err error) {
+func IterativeFindNode(k *Kademlia, destID ID) (closestContacts []Contact, err error) {
     
     //1. FindClosestContacts -> this returns 3 closest nodes.
-    closestContacts := FindClosestContacts(k, req.NodeID)
+    closestContacts = FindClosestContacts(k, destID)
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
     ds := new(IDandContacts)
     ds.Contacts = closestContacts
-    ds.NodeID = req.NodeID
+    ds.NodeID = destID
     sort.Sort(ds)
     shortlist := ds.Contacts
     if len(closestContacts) == 0{
@@ -152,7 +151,7 @@ for {
         cur := c
         go func() {
             node_state[cur.NodeID] = "inactive"
-            main_chan <- FindNodeWithChannel(k, &cur, req.NodeID)
+            main_chan <- FindNodeWithChannel(k, &cur, destID)
         }()
     }
     go func() {
@@ -167,12 +166,14 @@ for {
             case <- timer_chan:
                 //remove contacts that did not respond to RPC from shortlist
                 shortlist = RemoveInactiveContacts(shortlist, node_state)
+                shortlist = SortContacts(shortlist, destID)
+
                 break Alpha_Loop
             case response := <- main_chan:
                 //UPDATE
                 fmt.Printf("%v responds to RPC with %v\n", response.NodeID, FirstBytesOfContactIDs(response.Contacts))
                 node_state[response.NodeID] = "active"
-                shortlist = UpdateShortlist(shortlist, response.Contacts, req.NodeID, node_state)
+                shortlist = UpdateShortlist(shortlist, response.Contacts, destID, node_state)
                 fmt.Printf("shortlist after adding: %v\n", FirstBytesOfContactIDs(shortlist))
                 if len(shortlist) > 0 {
                     fmt.Printf("closest: %v\nShortlist[0]%v\n", closestNode.NodeID[0], shortlist[0].NodeID[0])
@@ -188,16 +189,27 @@ for {
     shortlist = RemoveInactiveContacts(shortlist, node_state)
     shortlist = RemoveNodesToRPC(shortlist, node_state)
     fmt.Printf("shortlist returned: %v\n", FirstBytesOfContactIDs(shortlist))
-    res.Nodes = ContactsToFoundNodes(shortlist)
-    res.MsgID = req.MsgID
-    res.Err = nil
+    closestContacts = GetFirstAlphaContacts(shortlist)
 
     //UpdateShortlist: Using responses from FindNode calls: update shortlist -> if contact is in active/inactive map, don't add it to shortlist
     //Update closestNode
     //Call General Update Function That We Haven't Done Before
     //Send FindNode RPCs again until: -- none of the new contacts are closer (i.e. closestNode doesn't change)  -- there are k active "already been queried" contacts in the shortlist
     
-    return nil;
+    return;
+}
+
+func GetFirstAlphaContacts(contacts []Contact)([]Contact){
+    //Gets the first alpha contacts of a slice of contacts
+    alphaClosest := make([]Contact, 0, ALPHA)
+    for _,c := range contacts{
+        if (len(alphaClosest) < cap(alphaClosest)){
+            alphaClosest = append(alphaClosest, c)
+        }else{
+            return alphaClosest
+        }
+    }
+    return alphaClosest
 }
 
 
@@ -212,7 +224,7 @@ func RemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_
    return
 }
 
-func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, node_state map[ID]string) []Contact {
+func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, destID ID, node_state map[ID]string) []Contact {
     //Adds alpha_contacts to short list.
     //Remove duplicates or inactive contacts from shortlist.
     //Then sorts shortlist
@@ -230,12 +242,17 @@ func UpdateShortlist(shortlist []Contact, alpha_contacts[]Contact, dest_id ID, n
         }
     }
     //sort new_shortlist
-    ds := new(IDandContacts)
-    ds.Contacts = shortlist
-    ds.NodeID = dest_id
-    sort.Sort(ds)
-    shortlist = ds.Contacts
+    shortlist = SortContacts(shortlist, destID)
     return shortlist
+}
+
+func SortContacts(contacts []Contact, destID ID)([]Contact){
+    //Wrapper for using sorting function
+    idc := new(IDandContacts)
+    idc.Contacts = contacts
+    idc.NodeID = destID
+    sort.Sort(idc)
+    return idc.Contacts
 }
 
 func GetAlphaNodesToRPC(nodes []Contact, node_state map[ID]string) (alpha_contacts_to_rpc []Contact) {
