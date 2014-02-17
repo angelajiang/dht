@@ -123,6 +123,11 @@ func main() {
                 contact, err := kademlia.FindContactLocally(kadem, node_id)
                 if err != nil {
                     //IterativeStore
+                    storedIn, err := kademlia.IterativeStore(kadem, key, val)
+                    if err != nil{
+                        log.Printf("%v\n", err)
+                    }
+                    fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1].NodeID)
                 } else {
                     err := kademlia.CallStore(&contact, key, val)
                     if err != nil {
