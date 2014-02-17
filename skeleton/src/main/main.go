@@ -135,6 +135,7 @@ func main() {
                     }
                 }
             case "find_node":
+                //find_node nodeID
                 node_id, err := kademlia.FromString(cmdline_args[1])
                 if err != nil {
                     fmt.Printf("error converting from byte array to ID\n")
@@ -143,9 +144,9 @@ func main() {
                     if err != nil {
                         closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
                         if err != nil{
-                            fmt.Printf("Closest IDs: %v\n", kademlia.ContactsToIDs(closestContacts))
-                        }else{
                             fmt.Printf("%v\n", err)
+                        }else{
+                            fmt.Printf("Closest IDs: %v\n", kademlia.ContactsToIDs(closestContacts))
                         }
                     }else{
                         fmt.Printf("Found ID: %v\n", contact.NodeID)
