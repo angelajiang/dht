@@ -118,21 +118,20 @@ func GetBucketIndex(distance ID)(index int){
 
 func FindContactLocally(k *Kademlia, contact_id ID) (ret Contact, err error) {
     dist := k.NodeID.Xor(contact_id)
-    bucket_index := GetBucketIndex(dist) 
+    bucket_index := GetBucketIndex(dist)
     for _, contact := range k.Buckets[bucket_index].Contacts {
         if contact.NodeID == contact_id {
             ret = contact
             err = nil
             fmt.Printf("%v  %v\n", contact.Host, contact.Port)
-            break
+            return ret, err
         }
     }
     err = errors.New("No contact found locally\n")
-    fmt.Printf("ERR\n")
-    //err =
-    return ret, err  
+    fmt.Printf("LOCAL FIND CONTACT ERR\n")
+    return ret, err
 }
-    
+
 //TESTING HELPERS
 
 func HexDigitToID(hex_digit string, n int) (id ID){
