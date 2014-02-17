@@ -37,10 +37,10 @@ func main() {
     //fmt.Printf("host: %v\n", host)
 
     //FOR DEBUGGING!!!!
-    port = uint16(kademlia.Random(4000,5000))
-    fmt.Printf("port: %v\n", port)
+   // port = uint16(kademlia.Random(4000,5000))
+   // fmt.Printf("port: %v\n", port)
     listen_str = kademlia.HostPortToPeerStr(host, port)
-
+    
     kadem := kademlia.NewKademlia(host, port)
     //fmt.Printf("kadem NodeID: %v\n", kadem.NodeID)
     rpc.Register(kadem)
@@ -49,7 +49,7 @@ func main() {
     if err != nil {
         log.Fatal("Listen: ", err)
     }
-
+    //kademlia.TestUpdate(kadem, 6)
     //kademlia.TestPingFirstPeer(kadem, first_peer_str)
 
     // Serve forever.
@@ -180,7 +180,8 @@ func main() {
                     log.Fatal("IterativeFindNode failed: %v\n", err)
                 }
                 fmt.Printf("FindNodeResult: %v\n", res.Nodes)
-
+            case "test_update":
+                kademlia.TestUpdate(kadem, 3)
         }
     }
 }
