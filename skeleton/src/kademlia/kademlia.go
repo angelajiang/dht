@@ -97,9 +97,11 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
           //log.Fatal("Call: ", err)
     } else {
         fmt.Printf("Calling Update From Ping!\n")
+        defer client.Close()
+        fmt.Printf("pong sender NodeID: %v\n", pong.Sender.NodeID)
         Update(k, &pong.Sender)
+        
     }
-    client.Close()
     return pong, err
 }
 
@@ -181,10 +183,11 @@ func Update(k *Kademlia, contact *Contact) error {
     case !in_bucket && is_full:
         fmt.Printf("Case: !in_bucket and is_full\n")
         /*Replace head of list if head doesn't respond. Otherwise, ignore*/
-        fmt.Printf("Ping'd Contact. Host: %v, Port: %v\n",
+        fmt.Printf("Ping'd Contact Host: %v, Port: %v\n",
         bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)
-        pong, err := CallPing(k, bucket_addr.Contacts[0].Host,
-        bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
+        fmt.Printf("Ping'd Contact NodeID: %v\n",
+        bucket_addr.Contacts[0].NodeID)
+        pong, err := CallPing(k, bucket_addr.Contacts[0].Host, bucket_addr.Contacts[0].Port)//bucket_addr.Contacts[0].Port)
         fmt.Printf("%+v\n", pong)
         if err != nil {
             //drop head and append contact to end of list
