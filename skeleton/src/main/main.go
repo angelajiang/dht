@@ -145,12 +145,19 @@ func main() {
                     }
                 }
             case "find_value":
-                node_id, err := kademlia.FromString(cmdline_args[1])
                 key, err := kademlia.FromString(cmdline_args[2])
                 if err != nil {
                     fmt.Printf("error converting from byte array to ID\n")
                 } else {
-                    kademlia.FindValueLocally(kadem, key)
+                    err := kademlia.FindValueLocally(kadem, key)
+                    if err != nil {
+                        retID, foundValue, err := kademlia.IterativeFindValue(kadem, key)
+                        if err != nil{
+                            fmt.Printf("%v\n", err)
+                            break
+                        }
+                        fmt.Printf("%v %v\n", retID, foundValue)
+                    }
                 }
             case "iterativeStore":
                 key, err := kademlia.FromString(cmdline_args[1])
