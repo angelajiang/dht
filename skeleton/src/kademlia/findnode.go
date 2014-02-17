@@ -7,6 +7,8 @@ import (
     "fmt"
     "time"
     "errors"
+    "log"
+    "net/rpc"
 )
 
 // Datatypes
@@ -32,7 +34,7 @@ type FindNodeResult struct {
 func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     //check if we're the node in question
     if req.NodeID == k.NodeID {
-        foundContact := ContactToFoundNode(k.KContact)
+        foundContact := ContactToFoundNode(k.GetContact())
         res.Nodes = append(res.Nodes, *foundContact)
     } else {
         closestContacts := FindClosestContacts(k, req.NodeID)
@@ -41,6 +43,31 @@ func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     res.MsgID = CopyID(req.MsgID)
     return nil
 }
+
+func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_contacts []FoundNode, err error){
+   //set up client 
+    peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
+    client, err := rpc.DialHTTP("tcp", peer_str)
+    if err != nil {
+          log.Fatal("DialHTTP in FindNode: ", err)
+    }
+    fmt.Printf("Client in CallFindNode\n")
+
+    req := new(FindNodeRequest)
+    var res FindNodeResult
+    req.Sender.NodeID = k.NodeID
+    req.Sender.Host = k.Host
+    req.Sender.Port = k.Port
+    req.MsgID = NewRandomID()
+    req.NodeID = search_id
+    err = client.Call("Kademlia.FindNode", req, &res) 
+    if err != nil {
+          log.Fatal("Error in CallFindNode: ", err)
+    }
+
+   return res.Nodes, nil
+}
+
 
 //Iterative
 func IterativeFindNode(k *Kademlia, destID ID) (closestContacts []Contact, err error) {

@@ -48,7 +48,7 @@ func CallPing(k *Kademlia, remote_host net.IP, port uint16) (Pong, error){
     fmt.Printf("Making Ping struct\n")
     ping := new(Ping)
     ping.MsgID = NewRandomID()
-    ping.Sender = k.KContact
+    ping.Sender = k.GetContact()
 
     var pong Pong
     err = client.Call("Kademlia.Ping", ping, &pong)

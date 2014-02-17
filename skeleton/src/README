@@ -2,10 +2,9 @@
 TODO:
 
 Update
-    Fix edge cases in Update
-    Look into issue of printing "after" twice in one call to update
+    Updating wrong bucket on receiver side of Ping
+Close connections
 Call Update in iterative functions
-Write function to return up to alpha closest contact in short list
 Command line cases 
 IterativeFindValue
 IterativeStore
