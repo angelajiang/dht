@@ -36,9 +36,11 @@ func (k *Kademlia) Ping(ping Ping, pong *Pong) error {
     pong.MsgID = CopyID(ping.MsgID)
     fmt.Printf("ping.MsgID from RPC call: %v\n", ping.MsgID.AsString())
     fmt.Printf("pong.MsgID from RPC call: %v\n", pong.MsgID.AsString())
+    fmt.Printf("Ping Recepient NodeID: %v\n", k.NodeID)
     pong.Sender.NodeID = k.NodeID
     pong.Sender.Host = k.Host
     pong.Sender.Port = k.Port
+    Update(k, &ping.Sender)
     return nil
 }
 
@@ -269,9 +271,9 @@ func GetAlphaNodesToRPC(nodes []Contact, node_state map[ID]string) (alpha_contac
         if _,ok := node_state[c.NodeID]; ok {
             //If it's in node_state, then we've already sent an rpc
             continue
-        } else{
+        } else {
             alpha_contacts_to_rpc = append(alpha_contacts_to_rpc, c)
-            if len(alpha_contacts_to_rpc) == cap(alpha_contacts_to_rpc){
+            if len(alpha_contacts_to_rpc) == cap(alpha_contacts_to_rpc) {
                 return
             }
         }
