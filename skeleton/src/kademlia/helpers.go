@@ -11,6 +11,7 @@ import (
     "time"
     "sort"
     "fmt"
+    "errors"
 )
 
 //SORTING//
@@ -115,17 +116,21 @@ func GetBucketIndex(distance ID)(index int){
 	return 
 }
 
-func FindContactLocally(k *Kademlia, contact_id ID) error {
+func FindContactLocally(k *Kademlia, contact_id ID) (ret Contact, err error) {
     dist := k.NodeID.Xor(contact_id)
     bucket_index := GetBucketIndex(dist) 
     for _, contact := range k.Buckets[bucket_index].Contacts {
         if contact.NodeID == contact_id {
+            ret = contact
+            err = nil
             fmt.Printf("%v  %v\n", contact.Host, contact.Port)
             break
         }
     }
+    err = errors.New("No contact found locally\n")
     fmt.Printf("ERR\n")
-    return nil
+    //err =
+    return ret, err  
 }
     
 //TESTING HELPERS
