@@ -182,7 +182,7 @@ func main() {
                 if err != nil{
                     log.Printf("%v\n", err)
                 }
-                fmt.Printf("%v stored in %v\n", key, kademlia.FirstBytesOfContactIDs(storedIn))
+                fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1])
 
             case "ifn":
                 //ifn f
