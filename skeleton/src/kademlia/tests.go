@@ -43,8 +43,8 @@ func TestStoreAndFindValue(k *Kademlia){
     fmt.Printf("Data to store: %v\n", tmp_data)
 
    	//Try to find value before store 
-	dest_contact := k.KContact
-    res, err := CallFindValue(k, &k.KContact, data_key)
+	dest_contact := k.GetContact()
+    res, err := CallFindValue(k, &dest_contact, data_key)
     if err != nil{
     	log.Fatal("CallFindValue: ", err)
     }

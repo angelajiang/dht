@@ -34,7 +34,7 @@ type FindNodeResult struct {
 func (k *Kademlia) FindNode(req FindNodeRequest, res *FindNodeResult) error {
     //check if we're the node in question
     if req.NodeID == k.NodeID {
-        foundContact := ContactToFoundNode(k.KContact)
+        foundContact := ContactToFoundNode(k.GetContact())
         res.Nodes = append(res.Nodes, *foundContact)
     } else {
         closestContacts := FindClosestContacts(k, req.NodeID)

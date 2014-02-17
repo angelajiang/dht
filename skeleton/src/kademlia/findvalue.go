@@ -56,7 +56,7 @@ func FindValueLocally(k *Kademlia, Key ID) error {
     //2. Find data corresponding to hashed key
     Val := k.Data[hashed_id]
     if Val == nil {
-        fmt.Printf("ERR")
+        fmt.Printf("Error in FindValueLocally\n")
     } else {
         fmt.Printf("Val: %v\n", Val)
     }
@@ -75,7 +75,7 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
     hashed_key := HashKey(Key)
     hashed_id, err := FromByteArray(hashed_key)
     req := new(FindValueRequest)
-    req.Sender = k.KContact
+    req.Sender = k.GetContact()
     req.MsgID = NewRandomID()
     req.Key = hashed_id
 

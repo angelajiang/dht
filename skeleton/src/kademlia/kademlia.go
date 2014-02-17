@@ -21,7 +21,6 @@ type Kademlia struct {
     Host net.IP
     Port uint16
     Data map[ID][]byte
-    KContact Contact
 }
 
 func NewKademlia(host net.IP, port uint16) *Kademlia {
@@ -35,14 +34,16 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     kptr.Host = host
     kptr.Port = port
     kptr.Data = make(map[ID][]byte, VALUESIZE)
-    c := new(Contact)
-    c.NodeID = kptr.NodeID
-    c.Host = host
-    c.Port = port
-    kptr.KContact = *c
     return kptr
 }
 
+func (k *Kademlia) GetContact() (Contact){
+    c := new(Contact)
+    c.NodeID = k.NodeID
+    c.Host = k.Host
+    c.Port = k.Port
+    return *c
+}
 
 func Update(k *Kademlia, contact *Contact) error {
     //Choose correct bucket to put contact
