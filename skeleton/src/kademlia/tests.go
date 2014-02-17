@@ -28,9 +28,9 @@ func TestPingFirstPeer(k *Kademlia, first_peer_str string){
 func TestUpdate(k *Kademlia, n int){
     //Making new contacts and calling Update
 	fmt.Printf("\nTESTING: Update\n")
-	for i := 0; i < n; i++ {
-		c := NewRandomContact()
-	    Update(k, c)
+    for i := 0; i < n; i++ {
+		c := NewIterativeContacts(n)
+	    Update(k, &c[i])
 	}
 	fmt.Printf("After adding %v contacts:\n%v\n", n, k.Buckets)
 }

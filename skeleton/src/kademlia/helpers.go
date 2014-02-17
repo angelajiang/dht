@@ -118,8 +118,20 @@ func Random(min, max int) int {
     return rand.Intn(max - min) + min
 }
 
-func NewRandomContact()(*Contact){
-    port := uint16(Random(4000,5000))
+func NewIterativeContacts(n int)(contacts []Contact) {
+    starting_port := 4000
+    for i := 0; i < n; i++ {
+        nodeid := NewRandomID()
+        ip := net.ParseIP("127.0.0.1")
+        port := uint16(starting_port)
+        new_contact := Contact{nodeid, ip, port}
+        contacts = append(contacts, new_contact)
+    }
+    return 
+}
+
+func NewRandomContact()(*Contact) {
+    port := uint16(Random(4000,4003))
     ip := net.ParseIP("127.0.0.1")
     nodeid := NewRandomID()
     return &Contact{nodeid, ip, port}
