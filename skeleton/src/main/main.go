@@ -153,14 +153,23 @@ func main() {
                 val := []byte(cmdline_args[2])
                 */
             case "iterativeFindNode":
-
-                /*
-                node_id := []byte(cmdline_args[1])
-                */
+                node_id, err := kademlia.FromString(cmdline_args[1])
+                closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
+                if err != nil {
+                    log.Fatal("IterativeFindNode failed:\n", err)
+                }
+                fmt.Printf("closest contacts: %v\n", closestContacts)
+                for i, contact := range closestContacts {
+                    fmt.Printf("Contact %v ID: %v\n", i, contact.NodeID)
+                }
             case "iterativeFindValue":
-                /*
-                key := []byte(cmdline_args[1])
-                */
+                key, err := kademlia.FromString(cmdline_args[1])
+                retID, foundValue, err := kademlia.IterativeFindValue(kadem, key)
+                if err != nil{
+                    fmt.Printf("%v\n", err)
+                    break
+                }
+                fmt.Printf("%v %v\n", retID, foundValue)
             case "is":
                 if len(cmdline_args) != 3 {
                     log.Printf("Error: Wrong number of arguments calling ifn. Expected 3, got %v\n", len(cmdline_args))
