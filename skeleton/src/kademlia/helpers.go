@@ -9,7 +9,10 @@ import (
     "crypto/sha1"
     "math/rand"
     "time"
+    "sort"
 )
+
+//SORTING//
 
 //Implemented sort for contacts
 type IDandContacts struct {
@@ -26,6 +29,15 @@ func (ds *IDandContacts) Less(i, j int) bool {
     i_dist := ds.Contacts[i].NodeID.Xor(ds.NodeID)
     j_dist := ds.Contacts[j].NodeID.Xor(ds.NodeID)
     return i_dist.PrefixLen() > j_dist.PrefixLen()
+}
+
+func SortContacts(contacts []Contact, destID ID)([]Contact){
+    //Wrapper for using sorting function
+    idc := new(IDandContacts)
+    idc.Contacts = contacts
+    idc.NodeID = destID
+    sort.Sort(idc)
+    return idc.Contacts
 }
 
 //Implemented sort for IDs
