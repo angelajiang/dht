@@ -5,6 +5,7 @@ import (
     "encoding/hex"
     "math/rand"
     "time"
+    "fmt"
 )
 
 
@@ -97,6 +98,9 @@ func CopyID(id ID) (ret ID) {
 // Generate a ID matching a given string.
 func FromString(idstr string) (ret ID, err error) {
     bytes, err := hex.DecodeString(idstr)
+
+    fmt.Printf("bytes: %v\n", bytes)
+    fmt.Printf("len bytes: %v\n", len(bytes))
     if err != nil {
         return
     }

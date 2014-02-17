@@ -141,11 +141,19 @@ func main() {
                 } else {
                     contact, err := kademlia.FindContactLocally(kadem, node_id)
                     if err != nil {
-                        //IterativeFindNode
+                        closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
+                        if err != nil{
+                            fmt.Printf("Closest IDs: %v\n", kademlia.ContactsToIDs(closestContacts))
+                        }else{
+                            fmt.Printf("%v\n", err)
+                        }
+                    }else{
+                        fmt.Printf("Found ID: %v\n", contact.NodeID)
                     }
+
                 }
             case "find_value":
-                node_id, err := kademlia.FromString(cmdline_args[1])
+                _, err := kademlia.FromString(cmdline_args[1])
                 key, err := kademlia.FromString(cmdline_args[2])
                 if err != nil {
                     fmt.Printf("error converting from byte array to ID\n")
@@ -158,6 +166,7 @@ func main() {
                 storedIn, err := kademlia.IterativeStore(kadem, key, val)
                 if err != nil{
                     log.Printf("%v\n", err)
+                    break
                 }
                 fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1].NodeID)
             case "iterativeFindNode":
@@ -189,6 +198,7 @@ func main() {
                 storedIn, err := kademlia.IterativeStore(kadem, key, value)
                 if err != nil{
                     log.Printf("%v\n", err)
+                    break
                 }
                 fmt.Printf("%v stored in %v\n", key, storedIn[len(storedIn)-1])
 

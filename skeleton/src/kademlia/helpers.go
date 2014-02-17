@@ -184,4 +184,12 @@ func FirstBytesOfContactIDs(contacts []Contact) (bytes []byte){
     return
 }
 
+func ContactsToIDs(contacts []Contact)(ids []ID){
+    ids = make([]ID, 0) 
+    for _, c := range contacts{
+        ids = append(ids, c.NodeID)
+    }
+    return
+}
+
 
