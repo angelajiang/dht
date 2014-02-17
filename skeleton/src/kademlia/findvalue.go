@@ -164,11 +164,14 @@ func IterativeFindValue(k *Kademlia, key ID) (retID ID, foundValue []byte, e err
                     //remove contacts that did not respond to RPC from shortlist
                     shortlist = RemoveInactiveContacts(shortlist, node_state)
                     shortlist = SortContacts(shortlist, key)
-
                     break Alpha_Loop
                 case response := <- main_chan:
                     //UPDATE
                     //TODO: do something with response.Err?
+                    for _,c := range response.Contacts{
+                        cur := c
+                        Update(k, &cur)
+                    }
                     if response.Value != nil{
                         fmt.Printf("Found value %v from node %v\n", response.Value, response.NodeID)
                         foundValue = response.Value
