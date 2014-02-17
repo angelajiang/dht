@@ -103,46 +103,50 @@ func main() {
                 fmt.Printf("%v\n", kadem.NodeID)
             case "local_find_value":
                 fmt.Printf("local_find_value")
-                key_array := []byte(cmdline_args[1])
-                key_id, err := kademlia.FromByteArray(key_array)
+                key, err := kademlia.FromString(cmdline_args[1])
                 if err != nil {
                     fmt.Printf("error converting from byte array to ID\n")
                 } else {
-                    kademlia.FindValueLocally(kadem, key_id)
+                    kademlia.FindValueLocally(kadem, key)
                 }
             case "get_contact":
-                id_array := []byte(cmdline_args[1])
-                id, err := kademlia.FromByteArray(id_array)
+                node_id, err := kademlia.FromString(cmdline_args[1])
                 if err != nil {
                     fmt.Printf("error converting from byte array to ID\n")
                 } else {
-                    kademlia.FindContactLocally(kadem, id)
+                    kademlia.FindContactLocally(kadem, node_id)
                 }
             case "store":
-                node_id_array := []byte(cmdline_args[1])
-                node_id, err := FromByteArray(node_id_array)
-                key := []byte(cmdline_args[2])
-                val := []byte(cmdline_args[2])
+                node_id, err := kademlia.FromString(cmdline_args[1])
+                key, err := kademlia.FromString(cmdline_args[2])
+                val := []byte(cmdline_args[3])
                 contact, err := kademlia.FindContactLocally(kadem, node_id)
                 if err != nil {
                     //IterativeStore
                 } else {
-                    err := kademlia.CallStore(contact, key, val)
+                    err := kademlia.CallStore(&contact, key, val)
                     if err != nil {
                         fmt.Printf("error storing value\n")
                     }
                 }
             case "find_node":
-                /*
-                node_id := []byte(cmdline_args[1])
-                key := []byte(cmdline_args[2])
-                */
+                node_id, err := kademlia.FromString(cmdline_args[1])
+                if err != nil {
+                    fmt.Printf("error converting from byte array to ID\n")
+                } else {
+                    contact, err := kademlia.FindContactLocally(kadem, node_id)
+                    if err != nil {
+                        //IterativeFindNode
+                    }
+                }
             case "find_value":
-                //node_id := []byte(cmdline_args[1])
-                //key := []byte(cmdline_args[2])
-                d := string(cmdline_args[1])
-                key := kademlia.HexDigitToID(d, 20)
-                kademlia.FindValueLocally(kadem, key)
+                node_id, err := kademlia.FromString(cmdline_args[1])
+                key, err := kademlia.FromString(cmdline_args[2])
+                if err != nil {
+                    fmt.Printf("error converting from byte array to ID\n")
+                } else {
+                    kademlia.FindValueLocally(kadem, key)
+                }
             case "iterativeStore":
                 /*
                 key := []byte(cmdline_args[1])
