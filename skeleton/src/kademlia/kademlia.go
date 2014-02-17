@@ -6,8 +6,6 @@ package kademlia
 
 import (
     "net"
-    "net/rpc"
-    "log"
     "fmt"
     "errors"
 )
@@ -43,86 +41,6 @@ func NewKademlia(host net.IP, port uint16) *Kademlia {
     c.Port = port
     kptr.KContact = *c
     return kptr
-}
-
-func FindContactLocally(k *Kademlia, contact_id ID) error {
-    dist := k.NodeID.Xor(contact_id)
-    bucket_index := GetBucketIndex(dist) 
-    for _, contact := range k.Buckets[bucket_index].Contacts {
-        if contact.NodeID == contact_id {
-            fmt.Printf("%v  %v\n", contact.Host, contact.Port)
-            break
-        }
-    }
-    fmt.Printf("ERR\n")
-    return nil
-}
-
-func FindValueLocally(k *Kademlia, Key ID) error {
-    //1. Hash key
-    hashed_key := HashKey(Key)
-    hashed_id, err := FromByteArray(hashed_key)
-    if err != nil {
-        fmt.Printf("error hashing key\n")
-    }
-    //2. Find data corresponding to hashed key
-    Val := k.Data[hashed_id]
-    if Val == nil {
-        fmt.Printf("ERR")
-    } else {
-        fmt.Printf("Val: %v\n", Val)
-    }
-    return nil
-}
-
-func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult, error){
-    //Set up client.
-    peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
-    client, err := rpc.DialHTTP("tcp", peer_str)
-    if err != nil {
-        //maybe get rid of contact?
-        log.Fatal("DialHttp: ", err)
-    }
-    //Create FindValueRequest
-    hashed_key := HashKey(Key)
-    hashed_id, err := FromByteArray(hashed_key)
-    req := new(FindValueRequest)
-    req.Sender = k.KContact
-    req.MsgID = NewRandomID()
-    req.Key = hashed_id
-
-    //Call Kademlia.FindValue
-    result := new(FindValueResult)
-    err = client.Call("Kademlia.FindValue", req, &result)
-    if err != nil {
-          log.Fatal("Call: ", err)
-    }
-    //result either has value or Nodes
-    return result, nil
-}
-
-func CallFindNode(k *Kademlia, remoteContact *Contact, search_id ID) (close_contacts []FoundNode, err error){
-   //set up client 
-    peer_str := HostPortToPeerStr(remoteContact.Host, remoteContact.Port)
-    client, err := rpc.DialHTTP("tcp", peer_str)
-    if err != nil {
-          log.Fatal("DialHTTP in FindNode: ", err)
-    }
-    fmt.Printf("Client in CallFindNode\n")
-
-    req := new(FindNodeRequest)
-    var res FindNodeResult
-    req.Sender.NodeID = k.NodeID
-    req.Sender.Host = k.Host
-    req.Sender.Port = k.Port
-    req.MsgID = NewRandomID()
-    req.NodeID = search_id
-    err = client.Call("Kademlia.FindNode", req, &res) 
-    if err != nil {
-          log.Fatal("Error in CallFindNode: ", err)
-    }
-
-   return res.Nodes, nil
 }
 
 
