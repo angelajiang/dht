@@ -92,8 +92,9 @@ func main() {
                     s := []string{"localhost:", host_to_ping}
                     host_to_ping = strings.Join(s, "") 
                 }
-                listen_netip, peer_uint16 := kademlia.PeerStrToHostPort(host_to_ping)
-                pong_from_host, err = kademlia.CallPing(kadem,listen_netip, peer_uint16)
+                remoteIP, remotePort := kademlia.PeerStrToHostPort(host_to_ping)
+                fmt.Printf("IP to ping: %v\n peer: %v\n", remoteIP, remotePort)
+                pong_from_host, err = kademlia.CallPing(kadem, remoteIP, remotePort)
                 if err != nil {
                     log.Fatal("ReadLine failed: ", cmd_err)
                 }
