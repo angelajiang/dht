@@ -11,14 +11,12 @@ import (
     "errors"
 )
 
-
 // Host identification.
 type Contact struct {
     NodeID ID
     Host net.IP
     Port uint16
 }
-
 
 // PING
 type Ping struct {
@@ -41,27 +39,6 @@ func (k *Kademlia) Ping(ping Ping, pong *Pong) error {
     pong.Sender.Port = k.Port
     return nil
 }
-
-
-// STORE
-type StoreRequest struct {
-    Sender Contact
-    MsgID ID
-    Key ID
-    Value []byte
-}
-
-type StoreResult struct {
-    MsgID ID
-    Err error
-}
-
-func (k *Kademlia) Store(req StoreRequest, res *StoreResult) error {
-    k.Data[req.Key] = req.Value
-    res.MsgID = CopyID(req.MsgID)
-    return nil
-}
-
 
 // FIND_NODE
 type FindNodeRequest struct {
