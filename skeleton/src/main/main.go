@@ -37,8 +37,8 @@ func main() {
     //fmt.Printf("host: %v\n", host)
 
     //FOR DEBUGGING!!!!
-   // port = uint16(kademlia.Random(4000,5000))
-   // fmt.Printf("port: %v\n", port)
+    port = uint16(kademlia.Random(4000,5000))
+    fmt.Printf("port: %v\n", port)
     listen_str = kademlia.HostPortToPeerStr(host, port)
     
     kadem := kademlia.NewKademlia(host, port)
@@ -146,10 +146,11 @@ func main() {
                 key := []byte(cmdline_args[2])
                 */
             case "find_value":
-                /*
-                node_id := []byte(cmdline_args[1])
-                key := []byte(cmdline_args[2])
-                */
+                //node_id := []byte(cmdline_args[1])
+                //key := []byte(cmdline_args[2])
+                d := string(cmdline_args[1])
+                key := kademlia.HexDigitToID(d, 20)
+                kademlia.FindValueLocally(kadem, key)
             case "iterativeStore":
                 /*
                 key := []byte(cmdline_args[1])
@@ -164,6 +165,19 @@ func main() {
                 /*
                 key := []byte(cmdline_args[1])
                 */
+            case "is":
+                if len(cmdline_args) != 3 {
+                    log.Printf("Error: Wrong number of arguments calling ifn. Expected 3, got %v\n", len(cmdline_args))
+                    break
+                }
+                d := string(cmdline_args[1])
+                key := kademlia.HexDigitToID(d, 20)
+                value := []byte(cmdline_args[2]) 
+                storedIn, err := kademlia.IterativeStore(kadem, key, value)
+                if err != nil{
+                    log.Printf("%v\n", err)
+                }
+                fmt.Printf("%v stored in %v\n", key, kademlia.FirstBytesOfContactIDs(storedIn))
 
             case "ifn":
                 //ifn f

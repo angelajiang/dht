@@ -62,6 +62,14 @@ func PeerStrToHostPort(listen_str string) (net.IP, uint16){
     return listen_netip, peer_uint16
 }
 
+func MoveToEnd(list []Contact, index int) (ret []Contact) {
+    //list = a, b, c -> b, c, a
+    contact := list[index]
+    ret = append(list[:index], list[(index+1):]...)
+    ret = append(ret, contact)
+    return
+}
+
 func HostPortToPeerStr(remote_host net.IP, port uint16) (peer_str string){
     remote_host_str := remote_host.String()
     port_uint64 := uint64(port)
@@ -79,27 +87,6 @@ func HashKey(key ID) []byte {
     return bs
 }
 
-func InBucket(contact *Contact, bucket Bucket) (in_bucket bool, index int) {
-    /*Returns true if contact is in contact list of bucket*/
-    in_bucket = false
-    for i, cur_contact := range bucket.Contacts {
-        index = i
-        if contact.NodeID == cur_contact.NodeID{
-            in_bucket = true
-            return
-        }
-    }
-    return
-}
-
-func IsFull(bucket Bucket) bool {
-    /*Returns true if bucket is full*/
-    if len(bucket.Contacts) == cap(bucket.Contacts){
-        return true
-    }
-    return false
-}
-
 func GetBucketIndex(distance ID)(index int){
 	/*Given distance, returns first set bit counting from MSB
 	 	ex) 0011 0101 -> 3	*/
@@ -114,16 +101,17 @@ func GetBucketIndex(distance ID)(index int){
     }
 	return 
 }
+    
+//TESTING HELPERS
 
-func MoveToEnd(list []Contact, index int) (ret []Contact) {
-    //list = a, b, c -> b, c, a
-    contact := list[index]
-    ret = append(list[:index], list[(index+1):]...)
-    ret = append(ret, contact)
+func HexDigitToID(hex_digit string, n int) (id ID){
+    //Takes hex number of all digits as "digit"
+    //returns number as n-byte id
+    //HexDigitToID(f,160) -> ffff....ffff to byte array of size 160
+    id, _ = FromString(strings.Repeat(hex_digit, n*2))
     return
 }
 
-//TESTING HELPERS
 
 func Random(min, max int) int {
     rand.Seed(time.Now().UnixNano())

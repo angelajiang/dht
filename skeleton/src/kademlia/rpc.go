@@ -114,15 +114,11 @@ func IterativeFindNode(k *Kademlia, destID ID) (closestContacts []Contact, err e
     //1. FindClosestContacts -> this returns 3 closest nodes.
     closestContacts = FindClosestContacts(k, destID)
     //2. Make a sorted shortlist, add initial closest contacts to it. Set initial value of closestNode = closest contact in shortlist.
-    ds := new(IDandContacts)
-    ds.Contacts = closestContacts
-    ds.NodeID = destID
-    sort.Sort(ds)
-    shortlist := ds.Contacts
     if len(closestContacts) == 0{
-        err = errors.New("No contacts to send initial RPCs to.")
+        err = errors.New("Error in IterativeFindNode: No contacts to send initial RPCs to.")
         return
     }
+    shortlist := SortContacts(closestContacts, destID)
     closestNode := shortlist[0]
     updatedClosestContact := true
 
@@ -132,60 +128,60 @@ func IterativeFindNode(k *Kademlia, destID ID) (closestContacts []Contact, err e
     timer_chan := make(chan bool)
 
 
-Shortlist_Loop:
-for {
-    //Exit conditions
-    if updatedClosestContact == false{
-        fmt.Printf("IFN: exit condition 1\n")
-        break Shortlist_Loop
-    }
-    rpc_nodes := GetAlphaNodesToRPC(shortlist, node_state)
-    if len(rpc_nodes) == 0{
-        fmt.Printf("IFN: exit condition 2\n")
-        //No more nodes in shortlist to query
-        break Shortlist_Loop
-    }
-
-    //Did not exit. Start another iteration of sending alpha RPCs
-    updatedClosestContact = false
-    for _, c := range rpc_nodes {
-        fmt.Printf("Sending RPC to %v\n", c.NodeID)
-        cur := c
-        go func() {
-            node_state[cur.NodeID] = "inactive"
-            main_chan <- FindNodeWithChannel(k, &cur, destID)
-        }()
-    }
-    go func() {
-        time.Sleep(1000 * time.Millisecond)
-        timer_chan <- true
-    }()
-
-    Alpha_Loop:
+    Shortlist_Loop:
     for {
-        //Wait for reponses from RPC calls and timer
-        select {
-            case <- timer_chan:
-                //remove contacts that did not respond to RPC from shortlist
-                shortlist = RemoveInactiveContacts(shortlist, node_state)
-                shortlist = SortContacts(shortlist, destID)
+        //Exit conditions
+        if updatedClosestContact == false{
+            fmt.Printf("IFN: exit condition 1\n")
+            break Shortlist_Loop
+        }
+        rpc_nodes := GetAlphaNodesToRPC(shortlist, node_state)
+        if len(rpc_nodes) == 0{
+            fmt.Printf("IFN: exit condition 2\n")
+            //No more nodes in shortlist to query
+            break Shortlist_Loop
+        }
 
-                break Alpha_Loop
-            case response := <- main_chan:
-                //UPDATE
-                fmt.Printf("%v responds to RPC with %v\n", response.NodeID, FirstBytesOfContactIDs(response.Contacts))
-                node_state[response.NodeID] = "active"
-                shortlist = UpdateShortlist(shortlist, response.Contacts, destID, node_state)
-                fmt.Printf("shortlist after adding: %v\n", FirstBytesOfContactIDs(shortlist))
-                if len(shortlist) > 0 {
-                    fmt.Printf("closest: %v\nShortlist[0]%v\n", closestNode.NodeID[0], shortlist[0].NodeID[0])
-                    if closestNode.NodeID != shortlist[0].NodeID {
-                        closestNode = shortlist[0]    
-                        updatedClosestContact = true
+        //Did not exit. Start another iteration of sending alpha RPCs
+        updatedClosestContact = false
+        for _, c := range rpc_nodes {
+            fmt.Printf("Sending RPC to %v\n", c.NodeID)
+            cur := c
+            go func() {
+                node_state[cur.NodeID] = "inactive"
+                main_chan <- FindNodeWithChannel(k, &cur, destID)
+            }()
+        }
+        go func() {
+            time.Sleep(1000 * time.Millisecond)
+            timer_chan <- true
+        }()
+
+        Alpha_Loop:
+        for {
+            //Wait for reponses from RPC calls and timer
+            select {
+                case <- timer_chan:
+                    //remove contacts that did not respond to RPC from shortlist
+                    shortlist = RemoveInactiveContacts(shortlist, node_state)
+                    shortlist = SortContacts(shortlist, destID)
+
+                    break Alpha_Loop
+                case response := <- main_chan:
+                    //UPDATE
+                    fmt.Printf("%v responds to RPC with %v\n", response.NodeID, FirstBytesOfContactIDs(response.Contacts))
+                    node_state[response.NodeID] = "active"
+                    shortlist = UpdateShortlist(shortlist, response.Contacts, destID, node_state)
+                    fmt.Printf("shortlist after adding: %v\n", FirstBytesOfContactIDs(shortlist))
+                    if len(shortlist) > 0 {
+                        fmt.Printf("closest: %v\nShortlist[0]%v\n", closestNode.NodeID[0], shortlist[0].NodeID[0])
+                        if closestNode.NodeID != shortlist[0].NodeID {
+                            closestNode = shortlist[0]    
+                            updatedClosestContact = true
+                        }
                     }
                 }
             }
-        }
     }
 
     shortlist = RemoveInactiveContacts(shortlist, node_state)
