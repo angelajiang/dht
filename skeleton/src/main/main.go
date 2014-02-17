@@ -172,7 +172,7 @@ func main() {
                         }
                         fmt.Printf("%v %v\n", retID, foundValue)
                     } else {
-                       fmt.Printf("id %v val %v\n", kadem.NodeID, v)  
+                       fmt.Printf("%v %v\n", kadem.NodeID, v)  
                     }
                 }
             case "iterativeStore":

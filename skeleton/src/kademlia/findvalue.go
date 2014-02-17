@@ -175,6 +175,12 @@ func IterativeFindValue(k *Kademlia, key ID) (retID ID, foundValue []byte, e err
                         Update(k, &cur)
                     }
                     if response.Value != nil{
+                        kContact := k.GetContact()
+                        err := CallStore(&kContact, key, response.Value)
+                        if err != nil {
+                            log.Printf("Error in IterativeFindValue: Failed caching value at host\n")
+                            log.Printf("%v\n", err)
+                        }
                         fmt.Printf("Found value %v from node %v\n", response.Value, response.NodeID)
                         foundValue = response.Value
                         retID = response.NodeID
