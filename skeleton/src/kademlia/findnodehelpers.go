@@ -97,20 +97,6 @@ func FindNodeWithChannel(k *Kademlia, remoteContact *Contact, search_id ID) (ret
     return
 }
 
-func GetFirstAlphaContacts(contacts []Contact)([]Contact){
-    //Gets the first alpha contacts of a slice of contacts
-    alphaClosest := make([]Contact, 0, ALPHA)
-    for _,c := range contacts{
-        if (len(alphaClosest) < cap(alphaClosest)){
-            alphaClosest = append(alphaClosest, c)
-        }else{
-            return alphaClosest
-        }
-    }
-    return alphaClosest
-}
-
-
 func RemoveInactiveContacts(shortlist []Contact, node_state map[ID]string) (new_shortlist []Contact) {
     for _, c := range shortlist {
         if node_state[c.NodeID] == "inactive"{
@@ -173,3 +159,18 @@ func RemoveNodesToRPC(shortlist []Contact, node_state map[ID]string) []Contact{
     }
     return new_shortlist
 }
+
+func GetFirstAlphaContacts(contacts []Contact)([]Contact){
+    //Gets the first alpha contacts of a slice of contacts
+    alphaClosest := make([]Contact, 0, ALPHA)
+    for _,c := range contacts{
+        if (len(alphaClosest) < cap(alphaClosest)){
+            alphaClosest = append(alphaClosest, c)
+        }else{
+            return alphaClosest
+        }
+    }
+    return alphaClosest
+}
+
+
