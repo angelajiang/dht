@@ -66,21 +66,23 @@ func (k *Kademlia) FindValue(req FindValueRequest, res *FindValueResult) error {
     return nil
 }
 
-func FindValueLocally(k *Kademlia, Key ID) error {
+func FindValueLocally(k *Kademlia, Key ID) (Val []byte, err error) {
     //1. Hash key
     hashed_key := HashKey(Key)
-    hashed_id, err := FromByteArray(hashed_key)
-    if err != nil {
+    hashed_id, err_hashing := FromByteArray(hashed_key)
+    if err_hashing != nil {
         fmt.Printf("error hashing key\n")
     }
     //2. Find data corresponding to hashed key
-    Val := k.Data[hashed_id]
+    Val = k.Data[hashed_id]
     if Val == nil {
-        fmt.Printf("Error in FindValueLocally\n")
+        err = errors.New("Can't Find Value Locally\n")
+        //fmt.Printf("Error in FindValueLocally\n")
     } else {
-        fmt.Printf("Val: %v\n", Val)
+        err = nil
+        //fmt.Printf("id %v val %v\n", k.NodeID, Val)
     }
-    return nil
+    return Val, err
 }
 
 func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult, error){
