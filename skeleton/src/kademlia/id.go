@@ -71,7 +71,7 @@ func GetSetBits(distance ID)(ones []int){
     for i:= IDBytes-1; i >= 0; i-- {
         for j := 7; j >= 0; j-- {
             if (distance[i] >> uint8(j)) & 0x1 != 0 {
-                indices = append(indices, (8*IDBytes) - (8*i+j))
+                indices = append(indices, (8*IDBytes) - (8*i+j)-1)
             }
         }
     }
