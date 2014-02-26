@@ -1,28 +1,15 @@
+// httpserver.go
 package main
 
 import (
-    "fmt"
+    "flag"
     "net/http"
-	//"io/ioutil"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
+var port = flag.String("port", "8080", "Define what TCP port to bind to")
+var root = flag.String("root", "static", "Define the root filesystem path")
 
 func main() {
-    http.HandleFunc("/", handler)
-    http.ListenAndServe(":8080", nil)
+    flag.Parse()
+    panic(http.ListenAndServe(":"+*port, http.FileServer(http.Dir(*root))))
 }
-/*
-
-type Box struct {
-	Title string
-    Tags []string
-}
-
-func (b *Box) save() error {
-    filename := p.Title + ".txt"
-    return ioutil.WriteFile(filename, p.Body, 0600)
-}
-*/
