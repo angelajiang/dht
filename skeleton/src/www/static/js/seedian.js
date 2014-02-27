@@ -1,5 +1,13 @@
 $(document).ready(function(){
 	//Manage tags
 	$(".tm-input").tagsManager();
-	$(".tm-input").tagsManager('tags');
+	var url = "localhost:9999"
+	var tags = $(".tm-input").tagsManager('tags');
+	function processTags(tags) {
+	  $.post(url+"/processTags", "", 
+	  	function(data, status) {
+		    $("#output").append("<br>");
+		    $("#output").append(data);
+  });
+}
 });
