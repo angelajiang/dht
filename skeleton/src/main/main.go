@@ -285,6 +285,23 @@ func main() {
 
             case "test_update":
                 kademlia.TestUpdate(kadem, 3)
+            case "test_store_local":
+                contact := new(kademlia.Contact)
+                contact.NodeID = kadem.NodeID
+                contact.Host = kadem.Host
+                contact.Port = kadem.Port
+                key := kademlia.NewRandomID()
+                val := make([]byte, 5)
+                kademlia.CallStore(contact, key, val) 
+                
+                res := new(kademlia.FindValueResult)
+                res, err := kademlia.CallFindValue(kadem, contact, key)
+                if err != nil {
+                    fmt.Printf("err")
+                }
+                fmt.Printf("value found is: %v\n", res.Value) 
+            case "test_store_remote":
+
         }
     }
 }

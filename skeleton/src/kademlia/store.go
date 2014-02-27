@@ -7,6 +7,7 @@ import (
 	"net/rpc"
 	"log"
 	"errors"
+    "fmt"
 )
 
 // STORE
@@ -25,6 +26,8 @@ type StoreResult struct {
 func (k *Kademlia) Store(req StoreRequest, res *StoreResult) error {
     k.Data[req.Key] = req.Value
     res.MsgID = CopyID(req.MsgID)
+    fmt.Printf("value to be stored is: %v\n", req.Value)
+    fmt.Printf("key to be stored at is: %v\n", req.Key)
     return nil
 }
 
@@ -47,10 +50,13 @@ func CallStore(remote_contact *Contact, Key ID, Value []byte) error {
     //set up request struct
     request.Sender = *(remote_contact)
     request.MsgID = NewRandomID()
-//    request.Key = Key
     request.Key = hashed_id
     request.Value = Value
 
+    fmt.Printf("NodeID to store this shit at: %v\n", remote_contact.NodeID)
+    fmt.Printf("Value passed to CallStore: %v, req.Value: %v\n", Value, request.Value)
+    fmt.Printf("Key passed to CallStore: %v, hashed key: %v,  req.Key: %v\n", Key, hashed_id, request.Key)
+    
     //make rpc call 
     err = client.Call("Kademlia.Store", request, &store_result)
     if err != nil {

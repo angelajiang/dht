@@ -93,6 +93,9 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
         //maybe get rid of contact?
         log.Fatal("DialHttp: ", err)
     }
+    
+    fmt.Printf("In CallFindValue\n")
+    fmt.Printf("Key passed to function: %v\n", Key)
     //Create FindValueRequest
     hashed_key := HashKey(Key)
     hashed_id, err := FromByteArray(hashed_key)
@@ -100,7 +103,9 @@ func CallFindValue(k *Kademlia, remoteContact *Contact, Key ID)(*FindValueResult
     req.Sender = k.GetContact()
     req.MsgID = NewRandomID()
     req.Key = hashed_id
-
+   
+    fmt.Printf("contact to search value in: %v\n", remoteContact.NodeID)
+    fmt.Printf("Hashed key: %v req.Key: %v\n", hashed_id, req.Key)
     //Call Kademlia.FindValue
     result := new(FindValueResult)
     err = client.Call("Kademlia.FindValue", req, &result)
@@ -116,7 +121,7 @@ func IterativeFindValue(k *Kademlia, key ID) (retID ID, foundValue []byte, e err
     e = errors.New("ERR")
 
     closestContacts := FindClosestContacts(k, key)
-    if len(closestContacts) == 0{
+    if len(closestContacts) == 0 {
         return
     }
     shortlist := SortContacts(closestContacts, key)
