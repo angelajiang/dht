@@ -31,6 +31,7 @@ var root = flag.String("root", "static", "Define the root filesystem path")
    	}
  */
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
+	fmt.Printf("client requested %v\n", r.URL.Path[1:])
 	//handler logic
 	var buf = make([]byte, 200)
 	var bytesRead, _ = io.ReadFull(r.Body, buf)
