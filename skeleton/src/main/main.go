@@ -301,7 +301,8 @@ func main() {
                 }
                 fmt.Printf("value found is: %v\n", res.Value) 
             case "test_store_remote":
-
+                //store value first
+                //get the other peer to search for it 
         }
     }
 }
