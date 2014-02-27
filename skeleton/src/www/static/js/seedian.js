@@ -1,8 +1,10 @@
 $(document).ready(function(){
 	//Manage tags
 	$(".tm-input").tagsManager();
-	var url = "localhost:9999"
-	var tags = $(".tm-input").tagsManager('tags');
+	//var url = "localhost:9999"
+	var tags = $("#tags").tagsManager('tags');
+	var tags2 = $("#tags2").tagsManager('tags');
+	/*
 	function processTags(tags) {
 	  $.post(url+"/processTags", "", 
 	  	function(data, status) {
@@ -10,4 +12,5 @@ $(document).ready(function(){
 		    $("#output").append(data);
   });
 }
+*/
 });
