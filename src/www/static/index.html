@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Seedian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="css/seedian.css" rel="stylesheet" media="screen">
+  <link href="css/tagmanager.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+        <h1 class="header">SEEDIAN
+            <small class="pull-right">A distributed system</small>
+        </h1>
+    </div>
+    <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-4">
+        <input type="text" id="tags" placeholder="Tags" class="tm-input"/>
+        <img class="content" src="images/fashion.jpg">
+     </div>
+     <div class="col-md-4">
+        <input type="text" id="tags2" placeholder="Tags" class="tm-input"/>
+        <img class="content" src="images/celebs.jpg">
+     </div>
+     <div id="output">
+     </div>
+    </div>
+    </div>
+  </div>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="js/tagmanager.js"></script>
+  <script src="js/typeahead.js"></script>
+  <script src="js/seedian.js"></script>
+</body>
+</html>
