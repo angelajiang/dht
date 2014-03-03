@@ -2,26 +2,28 @@ $(document).ready(function(){
 	//Manage tags
 	$(".tm-input").tagsManager();
 	var url = "localhost:5555"
-	var tags = $("#tags").tagsManager('tags');
+	var tags1 = $("#tags1").tagsManager('tags');
 	var tags2 = $("#tags2").tagsManager('tags');
-	processTags(tags)
-	function processTags(tags) {
+	tags1 = ["test1", "test2"]
+	processTags(tags1, "box1")
+	function processTags(tags, id) {
+		console.log(tags)
 		$.ajax({
+			dataType: "json",
 			url: "http://"+url+"/processTags",
-			data: { inputVal: "hi"},
-			success: function( data ) {
-					alert( "Data Loaded: " + data );
-			  		console.log("hello");
-				    $("#output").append("<br>");
-				    $("#output").append(data);
-				},
-			//headers: {"Access-Control-Allow-Origin": "http://localhost:8080"},
-			crossDomain: true,
-			error: function (xhr, ajaxOptions, thrownError) {
-			    console.log(xhr.status);
-	    		console.log(thrownError);
-			},
-			dataType: "jsonp"
+			traditional: true,
+			data: {tags: tags},
+			success: 
+			function(data) {
+					var items = [];
+					$.each( data, function( key, val ) {
+						items.push( "<a href='" + key + "'>" + val + "</a>" );
+					});
+					$( "<ul/>", {
+					"class": "my-new-list",
+					html: items.join( "" )
+					}).appendTo( "#"+id );
+				}
 		});
-	}
+	};
 });
