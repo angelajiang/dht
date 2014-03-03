@@ -42,20 +42,16 @@ var root = flag.String("root", "static", "Define the root filesystem path")
    	}
  */
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
+  w.Header().Set("Access-Control-Allow-Origin", "*")
 	fmt.Printf("client requested %v\n", r.URL.Path[1:])
 	var buf = make([]byte, 200)
-  //var bytesRead, _ = io.ReadFull(r.Body, buf)
-	var _, _ = io.ReadFull(r.Body, buf)
-	//fmt.Fprintf(w, "# of bytes read: %v!", bytesRead)
+  var bytesRead, _ = io.ReadFull(r.Body, buf)
   w.Header().Set("Content-Type", "application/json")
-  //fmt.Fprint(w, Response{"resp":"hi!"})
-  fmt.Fprint(w, "alert('hi');")
+  fmt.Fprint(w, Response{"numbytes":bytesRead})
 }
 
 func main() {
     flag.Parse()
     http.HandleFunc("/processTags", handlerProcessTags)
     http.ListenAndServe(":"+*port, nil)
-    //log.Fatal(http.ListenAndServe(":"+*port, nil))
-    //panic(http.ListenAndServe(":"+*port, http.FileServer(http.Dir(*root))))
 }
