@@ -48,7 +48,8 @@ func handlerProcessTags(w http.ResponseWriter, r *http.Request){
 	var _, _ = io.ReadFull(r.Body, buf)
 	//fmt.Fprintf(w, "# of bytes read: %v!", bytesRead)
   w.Header().Set("Content-Type", "application/json")
-  fmt.Fprint(w, Response{"resp":"hi!"})
+  //fmt.Fprint(w, Response{"resp":"hi!"})
+  fmt.Fprint(w, "alert('hi');")
 }
 
 func main() {
