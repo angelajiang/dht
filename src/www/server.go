@@ -35,9 +35,9 @@ func handlerProcessTags(w http.ResponseWriter, r *http.Request){
       log.Print(err)
     }
     values := r.Form
-    fmt.Printf("values: %v\n", values)
     jsonResp := Response{"tags":values["tags"]}
-    fmt.Printf("json: %v\n", jsonResp)
+    tags := values["tags"]
+    fmt.Printf("tags: %s\n", tags)
     fmt.Fprint(w, jsonResp)
 }
 
