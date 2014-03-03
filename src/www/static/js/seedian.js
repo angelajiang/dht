@@ -9,9 +9,11 @@ $(document).ready(function(){
 	function processTags(tags, id) {
 		console.log(tags)
 		$.ajax({
+			type:"POST",
 			dataType: "json",
 			url: "http://"+url+"/processTags",
 			traditional: true,
+			//data: {tags: JSON.stringify(tags)},
 			data: {tags: tags},
 			success: 
 			function(data) {
