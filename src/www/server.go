@@ -3,6 +3,7 @@ package main
 import (
     "flag"
     "net/http"
+    "net/url"
     "log"
     "fmt"
     "encoding/json"
@@ -10,19 +11,14 @@ import (
     "strconv"
 )
 
-type Response map[string][]RedditPost
+type PostsResponse map[string][]RedditPost
 
-/*
-func (r Response) String() (s string) {
-        b, err := json.Marshal(r)
-        if err != nil {
-                s = ""
-                return
-        }
-        s = string(b)
-        return
+func (r PostsResponse) String() (s string) {
+    b, err := json.Marshal(r)
+    perror(err, "handlerProcessTags", "marshalling response into JSON")
+    s = string(b)
+    return
 }
-*/
 
 type RedditListing struct {
     Kind string
@@ -52,7 +48,7 @@ func perror(err error, who string, why string) {
 }
 
 func getRedditListing(subreddit string) RedditListing{
-  url := "http://www.reddit.com/r/"+subreddit+".json"
+  url = "http://www.reddit.com/r/"+subreddit+".json"
   resp, err := http.Get(url)
   perror(err, "GetRedditListing", "getting URL "+url)
   defer resp.Body.Close()
@@ -80,22 +76,19 @@ func GetNPosts(listing RedditListing, n int64)([]RedditPost){
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
     w.Header().Set("Access-Control-Allow-Origin", "*")
   	//fmt.Printf("client requested %v\n", r.URL.Path[1:])
-    err := r.ParseForm()
+    var err error = r.ParseForm()
     perror(err, "handlerProcessTags", "parsing client request form")
-    values := r.Form
-    tags := values["tags"]
+    var values url.Values = r.Form
+    var tags []string = values["tags"]
     numLinks, err := strconv.ParseInt(values["numLinks"][0], 10, 0)
     perror(err, "handlerProcessTags", "Parsing value[numLinks] as int")
-    var resp map[string][]RedditPost = Response{}
+    var resp PostsResponse = PostsResponse{}
     for _, tag := range(tags){
       var rl RedditListing = getRedditListing(tag)
       var posts []RedditPost = GetNPosts(rl, numLinks)
       resp[tag] = posts
     }
-    fmt.Printf("resp: %v\n", resp)
-    byteResp, err := json.Marshal(resp)
-    perror(err, "handlerProcessTags", "marshalling response into JSON")
-    fmt.Fprint(w, string(byteResp))
+    fmt.Fprint(w, resp.String())
 }
 
 var port = flag.String("port", "5555", "Define what TCP port to bind to")
