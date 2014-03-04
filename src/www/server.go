@@ -3,14 +3,16 @@ package main
 import (
     "flag"
     "net/http"
+    "log"
     "fmt"
     "encoding/json"
     "io/ioutil"
     "strconv"
 )
 
-type Response map[string]interface{}
+type Response map[string][]RedditPost
 
+/*
 func (r Response) String() (s string) {
         b, err := json.Marshal(r)
         if err != nil {
@@ -20,6 +22,7 @@ func (r Response) String() (s string) {
         s = string(b)
         return
 }
+*/
 
 type RedditListing struct {
     Kind string
@@ -41,20 +44,20 @@ type RedditPost struct {
     Num_comments int64
 }
 
-func perror(err error) {
+func perror(err error, who string, why string) {
     if err != nil {
-        panic(err)
+      log.Printf("Error in %v when %v\n", who, why)
+      panic(err)
     }
 }
 
 func getRedditListing(subreddit string) RedditListing{
   url := "http://www.reddit.com/r/"+subreddit+".json"
   resp, err := http.Get(url)
-  fmt.Printf("Getting URL: %v\n", url)
-  perror(err)
+  perror(err, "GetRedditListing", "getting URL "+url)
   defer resp.Body.Close()
   body, err := ioutil.ReadAll(resp.Body)
-  perror(err)
+  perror(err, "GetRedditListing", "reading body of "+url)
   var rl RedditListing
   err = json.Unmarshal(body, &rl)
   return rl
@@ -76,19 +79,18 @@ func GetNPosts(listing RedditListing, n int64)([]RedditPost){
 
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
     w.Header().Set("Access-Control-Allow-Origin", "*")
-  	fmt.Printf("client requested %v\n", r.URL.Path[1:])
+  	//fmt.Printf("client requested %v\n", r.URL.Path[1:])
     err := r.ParseForm()
-    perror(err)
+    perror(err, "handlerProcessTags", "parsing client request form")
     values := r.Form
-    resp := Response{}
     tags := values["tags"]
-    numTags, err := strconv.ParseInt(values["numTags"][0], 10, 0)
-    perror(err)
-    for i, tag := range(tags){
+    numLinks, err := strconv.ParseInt(values["numLinks"][0], 10, 0)
+    perror(err, "handlerProcessTags", "Parsing value[numLinks] as int")
+    var resp map[string][]RedditPost = Response{}
+    for _, tag := range(tags){
       var rl RedditListing = getRedditListing(tag)
-      var posts []RedditPost = GetNPosts(rl, numTags)
-      fmt.Printf("tag %v: %v\n", i, tag)
-      fmt.Printf("%d posts: %v\n", numTags, posts)
+      var posts []RedditPost = GetNPosts(rl, numLinks)
+      resp[tag] = posts
     }
     fmt.Printf("resp: %v\n", resp)
     fmt.Fprint(w, resp)

@@ -4,15 +4,15 @@ $(document).ready(function(){
 	var url = "localhost:5555"
 	var tags1 = $("#tags1").tagsManager('tags');
 	var tags2 = $("#tags2").tagsManager('tags');
-	tags1 = ["gaming", 10, "funny"]
+	tags1 = ["gaming", "funny"]
 	processTags(tags1, 10, "box1")
-	function processTags(tags, numTags, id) {
+	function processTags(tags, numLinks, id) {
 		$.ajax({
 			type:"POST",
 			dataType: "json",
 			url: "http://"+url+"/processTags",
 			traditional: true,
-			data: {tags: tags, numTags:numTags},
+			data: {tags: tags, numLinks:numLinks},
 			success: 
 			function(data) {
 					var items = [];
