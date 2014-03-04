@@ -93,7 +93,9 @@ func handlerProcessTags(w http.ResponseWriter, r *http.Request){
       resp[tag] = posts
     }
     fmt.Printf("resp: %v\n", resp)
-    fmt.Fprint(w, resp)
+    byteResp, err := json.Marshal(resp)
+    perror(err, "handlerProcessTags", "marshalling response into JSON")
+    fmt.Fprint(w, string(byteResp))
 }
 
 var port = flag.String("port", "5555", "Define what TCP port to bind to")
