@@ -16,8 +16,11 @@ $(document).ready(function(){
 			success: 
 			function(data) {
 					var items = [];
-					$.each( data, function( key, val ) {
-						items.push( "<a href='" + key + "'>" + val + "</a><br>" );
+					$.each(data, function( tag, data ) {
+						$.each(data, function(index) {
+							var post = data[index];
+							items.push( "<a href='" + post.Url + "'>" + post.Title + "</a><br>" );
+						});
 					});
 					$( "<ul/>", {
 					"class": "my-new-list",
