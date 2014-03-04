@@ -5,7 +5,7 @@ import (
     "net/http"
     "fmt"
     "encoding/json"
-    "log"
+    "io/ioutil"
 )
 
 type Response map[string]interface{}
@@ -20,26 +20,66 @@ func (r Response) String() (s string) {
         return
 }
 
-var port = flag.String("port", "5555", "Define what TCP port to bind to")
-var root = flag.String("root", "static", "Define the root filesystem path")
+type RedditListing struct {
+    Kind string
+    Data RedditListingData
+}
 
-type test_struct struct {
-    Test string
+type RedditListingData struct {
+    Children []RedditT3
+}
+
+type RedditT3 struct{
+    Data RedditPost
+}
+
+type RedditPost struct {
+    Url string
+    Title string
+    Ups int64
+    Num_comments int64
+}
+
+func perror(err error) {
+    if err != nil {
+        panic(err)
+    }
+}
+
+func getRedditLinks(subreddit string){
+  url := "http://www.reddit.com/r/"+subreddit+".json"
+  resp, err := http.Get(url)
+  fmt.Printf("Getting URL: %v\n", url)
+  perror(err)
+  defer resp.Body.Close()
+  body, err := ioutil.ReadAll(resp.Body)
+  perror(err)
+  //var p interface{}
+  var p RedditListing
+  err = json.Unmarshal(body, &p)
+  //var rpost RedditPost 
+  fmt.Printf("message: %v\n", p)
 }
 
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
     w.Header().Set("Access-Control-Allow-Origin", "*")
   	fmt.Printf("client requested %v\n", r.URL.Path[1:])
     err := r.ParseForm()
-    if err != nil{
-      log.Print(err)
-    }
+    perror(err)
     values := r.Form
-    jsonResp := Response{"tags":values["tags"]}
+    resp := Response{}
     tags := values["tags"]
-    fmt.Printf("tags: %s\n", tags)
-    fmt.Fprint(w, jsonResp)
+    for i, tag := range(tags){
+      fmt.Printf("tag %v: %v\n", i, tag)
+      getRedditLinks(tag)
+      //resp[string(i)] = tag
+    }
+    fmt.Printf("resp: %v\n", resp)
+    fmt.Fprint(w, resp)
 }
+
+var port = flag.String("port", "5555", "Define what TCP port to bind to")
+var root = flag.String("root", "static", "Define the root filesystem path")
 
 func main() {
     flag.Parse()
