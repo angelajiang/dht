@@ -6,6 +6,7 @@ import (
     "fmt"
     "encoding/json"
     "io/ioutil"
+    "strconv"
 )
 
 type Response map[string]interface{}
@@ -46,7 +47,7 @@ func perror(err error) {
     }
 }
 
-func getRedditLinks(subreddit string){
+func getRedditListing(subreddit string) RedditListing{
   url := "http://www.reddit.com/r/"+subreddit+".json"
   resp, err := http.Get(url)
   fmt.Printf("Getting URL: %v\n", url)
@@ -54,11 +55,23 @@ func getRedditLinks(subreddit string){
   defer resp.Body.Close()
   body, err := ioutil.ReadAll(resp.Body)
   perror(err)
-  //var p interface{}
-  var p RedditListing
-  err = json.Unmarshal(body, &p)
-  //var rpost RedditPost 
-  fmt.Printf("message: %v\n", p)
+  var rl RedditListing
+  err = json.Unmarshal(body, &rl)
+  return rl
+}
+
+// Gets first n RedditPosts from a RedditListing
+// TODO: Deal with replicated links
+func GetNPosts(listing RedditListing, n int64)([]RedditPost){
+  var posts = make([]RedditPost, 0, n) 
+  var children []RedditT3 = listing.Data.Children 
+  for _, child := range(children){
+    var post RedditPost = child.Data
+    if (cap(posts)!=len(posts)){
+      posts = append(posts, post)
+    }
+  }
+  return posts
 }
 
 func handlerProcessTags(w http.ResponseWriter, r *http.Request){
@@ -69,10 +82,13 @@ func handlerProcessTags(w http.ResponseWriter, r *http.Request){
     values := r.Form
     resp := Response{}
     tags := values["tags"]
+    numTags, err := strconv.ParseInt(values["numTags"][0], 10, 0)
+    perror(err)
     for i, tag := range(tags){
+      var rl RedditListing = getRedditListing(tag)
+      var posts []RedditPost = GetNPosts(rl, numTags)
       fmt.Printf("tag %v: %v\n", i, tag)
-      getRedditLinks(tag)
-      //resp[string(i)] = tag
+      fmt.Printf("%d posts: %v\n", numTags, posts)
     }
     fmt.Printf("resp: %v\n", resp)
     fmt.Fprint(w, resp)
