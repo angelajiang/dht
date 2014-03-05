@@ -27,11 +27,13 @@ $(document).ready(function(){
 					$.each(data, function( tag, data ) {
 						$.each(data, function(index) {
 							var post = data[index];
-							items.push( "<a href='" + post.Url + "'>" + post.Title + "</a><br>" );
+							items.push( "<button type='button' class='btn btn-success btn-xs'>like</button>"+
+								"&nbsp;&nbsp;<a href='" + post.Url + "'>" + post.Title + "</a><br>");
+
 						});
 					});
-					$( "<ul/>", {
-					"class": "-new-list",
+					$( "<div/>", {
+					"class": "new-list",
 					html: items.join( "" )
 					}).appendTo( "#"+id );
 				}
