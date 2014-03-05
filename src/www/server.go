@@ -9,6 +9,7 @@ import (
     "encoding/json"
     "io/ioutil"
     "strconv"
+    "strings"
 )
 
 type PostsResponse map[string][]RedditPost
@@ -37,6 +38,7 @@ type RedditPost struct {
     Url string
     Title string
     Ups int64
+    Downs int64
     Num_comments int64
 }
 
@@ -79,7 +81,9 @@ func handlerProcessTags(w http.ResponseWriter, r *http.Request){
     var err error = r.ParseForm()
     perror(err, "handlerProcessTags", "parsing client request form")
     var values url.Values = r.Form
-    var tags []string = values["tags"]
+    //var tags []string = values["tags"]  //use if format: ["tag1", "tag2"]
+    var strTags string = values["tags"][0] 
+    var tags []string = strings.Split(strTags, " ")
     numLinks, err := strconv.ParseInt(values["numLinks"][0], 10, 0)
     perror(err, "handlerProcessTags", "Parsing value[numLinks] as int")
     var resp PostsResponse = PostsResponse{}

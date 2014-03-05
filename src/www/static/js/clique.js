@@ -5,15 +5,21 @@ $(document).ready(function(){
 	var tags1 = $("#tags1").tagsManager('tags');
 	*/
 	var url = "localhost:5555"
-	//$("#tags1").submit(processTags(tags1, 5, "box1"))
-	var tags1 = ["chicago", "Northwestern"]
+
+	//TODO: automate event binding
 	$("#tags1").keypress(
 		function(e){
-			console.log('here')
 			if (e.which == 13){
-				processTags(tags1, 10, "links1");
+				processTags($(this).val(), 10, "box1");
 			}
 		});
+	$("#tags2").keypress(
+		function(e){
+			if (e.which == 13){
+				processTags($(this).val(), 10, "box2");
+			}
+		});
+
 	function processTags(tags, numLinks, id) {
 		$.ajax({
 			type:"POST",
@@ -24,16 +30,24 @@ $(document).ready(function(){
 			success: 
 			function(data) {
 					var items = [];
-					$.each(data, function( tag, data ) {
+					$.each(data, function(tag, data ) {
+						//TODO: sort data by post.Ups
 						$.each(data, function(index) {
 							var post = data[index];
-							items.push( "<button type='button' class='btn btn-success btn-xs'>like</button>"+
-								"&nbsp;&nbsp;<a href='" + post.Url + "'>" + post.Title + "</a><br>");
+							items.push(
+								"<div class='clearfix'>"+
+								"<div class='ld-btn inline pull-left'>"+
+								"<div class='btn-group btn-block '>"+
+								"<button type='button' class='btn btn-success'>"+post.Ups+"</button>"+
+								"<button type='button' class='btn btn-danger'>"+post.Downs+"</button></div></div>"+
+								"&nbsp;&nbsp;"+
+								"<a class='inline' href='" + post.Url + "'>" + post.Title + "</a></div>");
 
 						});
 					});
 					$( "<div/>", {
-					"class": "new-list",
+					"class": "links",
+					"id": id+"-links",
 					html: items.join( "" )
 					}).appendTo( "#"+id );
 				}
