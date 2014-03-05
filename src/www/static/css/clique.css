@@ -26,6 +26,7 @@ img.content{
 }
 
 .links{
+	padding: 5px;
 	overflow:scroll;
 	height: 90%;
 }
