@@ -48,7 +48,7 @@ func perror(err error, who string, why string) {
 }
 
 func getRedditListing(subreddit string) RedditListing{
-  url = "http://www.reddit.com/r/"+subreddit+".json"
+  var url string = "http://www.reddit.com/r/"+subreddit+".json"
   resp, err := http.Get(url)
   perror(err, "GetRedditListing", "getting URL "+url)
   defer resp.Body.Close()

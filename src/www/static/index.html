@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Seedian</title>
+  <title>clique</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Bootstrap -->
   <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-  <link href="css/seedian.css" rel="stylesheet" media="screen">
+  <link href="css/clique.css" rel="stylesheet" media="screen">
   <link href="css/tagmanager.css" rel="stylesheet" media="screen">
 </head>
 <body>
   <div class="container">
     <div class="page-header">
-        <h1 class="header">SEEDIAN
+        <h1 class="header">clique
             <small class="pull-right">A distributed system</small>
         </h1>
     </div>
     <div class="container-fluid">
     <div class="row">
-     <div class="col-md-6" id="box1">
-        <input type="text" name="box1-tags" id="tags1" placeholder="Tags" class="tm-input"/>
+     <div class="col-md-5 box">
+        <input type="text" name="box1-tags" id="tags1"   class="form-control" placeholder="ex. chicago, funny">
+        <br>
+        <div class="links" id="links1">
+        </div>
      </div>
-     <div class="col-md-6" name="box2-tags" id="box2">
-        <input type="text" name="box2-tags" id="tags2" placeholder="Tags" class="tm-input"/>
+     <div class="col-md-5 box pull-right">
+        <input type="text" name="box2-tags" id="tags2"   class="form-control" placeholder="ex. chicago, funny">
+        <br>
+        <div class="links" id="links2">
+        </div>
      </div>
     </div>
     </div>
@@ -30,6 +36,6 @@
   <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
   <script src="js/tagmanager.js"></script>
   <script src="js/typeahead.js"></script>
-  <script src="js/seedian.js"></script>
+  <script src="js/clique.js"></script>
 </body>
 </html>

@@ -1,11 +1,19 @@
 $(document).ready(function(){
 	//Manage tags
+	/*
 	$(".tm-input").tagsManager();
-	var url = "localhost:5555"
 	var tags1 = $("#tags1").tagsManager('tags');
-	var tags2 = $("#tags2").tagsManager('tags');
-	tags1 = ["gaming", "funny"]
-	processTags(tags1, 10, "box1")
+	*/
+	var url = "localhost:5555"
+	//$("#tags1").submit(processTags(tags1, 5, "box1"))
+	var tags1 = ["chicago", "Northwestern"]
+	$("#tags1").keypress(
+		function(e){
+			console.log('here')
+			if (e.which == 13){
+				processTags(tags1, 10, "links1");
+			}
+		});
 	function processTags(tags, numLinks, id) {
 		$.ajax({
 			type:"POST",
@@ -23,7 +31,7 @@ $(document).ready(function(){
 						});
 					});
 					$( "<ul/>", {
-					"class": "my-new-list",
+					"class": "-new-list",
 					html: items.join( "" )
 					}).appendTo( "#"+id );
 				}

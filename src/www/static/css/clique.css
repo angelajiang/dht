@@ -18,3 +18,15 @@ div.content {
 img.content{
 	max-width:100%;
 }
+
+.box{
+	padding: 5px;
+	border: 1px solid #eee;
+	height: 400px;
+}
+
+.links{
+	overflow:scroll;
+	height: 90%;
+}
+
