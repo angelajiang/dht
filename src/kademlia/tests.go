@@ -41,12 +41,11 @@ func TestStoreAndFindValue(k *Kademlia){
     s := make([]byte, 5)
     tmp_data := s
     fmt.Printf("Data to store: %v\n", tmp_data)
-
-   	//Try to find value before store 
-	dest_contact := k.GetContact()
+    //Try to find value before store 
+    dest_contact := k.GetContact()
     res, err := CallFindValue(k, &dest_contact, data_key)
     if err != nil{
-    	log.Fatal("CallFindValue: ", err)
+      log.Fatal("CallFindValue: ", err)
     }
     fmt.Printf("CallFindValue before store: %v\n",res.Value)
     fmt.Printf("Nodes before store: %v\n",res.Nodes)
@@ -54,13 +53,13 @@ func TestStoreAndFindValue(k *Kademlia){
     //Call store
     err = CallStore(&dest_contact, data_key, tmp_data)
     if err != nil{
-    	log.Fatal("CallStore: ", err)
+      log.Fatal("CallStore: ", err)
     }
 
     //Try to find value after store
     res, err = CallFindValue(k, &dest_contact, data_key)
     if err != nil{
-    	log.Fatal("CallFindValue: ", err)
+      log.Fatal("CallFindValue: ", err)
     }
     fmt.Printf("CallFindValue after store: %v\n",res.Value)
     fmt.Printf("Nodes after store: %v\n",res.Nodes)

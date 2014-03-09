@@ -77,6 +77,7 @@ func main() {
                 kademlia.TestBasicRPCs(kadem, first_peer_str)
             case "ping":
                 //ping 123.12.12.0 1231
+                //ping 1111 --> will ping localhost:1111
                 ping := new(kademlia.Ping)
                 ping.MsgID = kademlia.NewRandomID()
                 ping.Sender.NodeID = kadem.NodeID
@@ -85,19 +86,43 @@ func main() {
                 ping.Sender.Port = port
                 var pong_from_host kademlia.Pong
                 host_to_ping := cmdline_args[1]
+                
                 if strings.Contains(host_to_ping, ":") {
-                } else {
-                    //If only port given, host is localhost
-                    s := []string{"localhost:", host_to_ping}
-                    host_to_ping = strings.Join(s, "") 
+                    remoteIP, remotePort := kademlia.PeerStrToHostPort(host_to_ping)
+                    fmt.Printf("IP to ping: %v\n peer: %v\n", remoteIP, remotePort)
+                    pong_from_host, err = kademlia.CallPing(kadem, remoteIP, remotePort)
+                    if err != nil {
+                        log.Fatal("ReadLine failed: ", cmd_err)
+                    }
+                    log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
+                } else { 
+                    node_id, err := kademlia.FromString(cmdline_args[1])
+                    if err != nil {
+                        fmt.Printf("error converting from byte array to ID\n")
+                    } else {
+                        contact, err := kademlia.FindContactLocally(kadem, node_id)
+                        if err != nil {
+                            closestContacts, err := kademlia.IterativeFindNode(kadem, node_id)
+                            if err != nil{
+                                fmt.Printf("%v\n", err)
+                            } else {
+                                //ping closest contact
+                                pong_from_host, err = kademlia.CallPing(kadem, closestContacts[0].Host, closestContacts[0].Port)
+                                if err != nil {
+                                    log.Fatal("ReadLine failed: ", cmd_err)
+                                }
+                                log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
+                            }
+                        } else {
+                            //ping local contact
+                            pong_from_host, err = kademlia.CallPing(kadem, contact.Host, contact.Port)
+                            if err != nil {
+                                log.Fatal("ReadLine failed: ", cmd_err)
+                            }
+                            log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
+                        }
+                    } 
                 }
-                remoteIP, remotePort := kademlia.PeerStrToHostPort(host_to_ping)
-                fmt.Printf("IP to ping: %v\n peer: %v\n", remoteIP, remotePort)
-                pong_from_host, err = kademlia.CallPing(kadem, remoteIP, remotePort)
-                if err != nil {
-                    log.Fatal("ReadLine failed: ", cmd_err)
-                }
-                log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
             case "whoami":
                 fmt.Printf("%v\n", kadem.NodeID)
             case "local_find_value":
@@ -159,7 +184,6 @@ func main() {
                     }else{
                         fmt.Printf("Found ID: %v\n", contact.NodeID)
                     }
-
                 }
             case "find_value":
                 key, err := kademlia.FromString(cmdline_args[2])
@@ -259,34 +283,58 @@ func main() {
                 }
                 fmt.Printf("%v %v\n", retID, foundValue)
 
-            case "p":
-                //ping 123.12.12.0 1231
-                //ping 1111 --> will ping localhost:1111
-                ping := new(kademlia.Ping)
-                ping.MsgID = kademlia.NewRandomID()
-                ping.Sender.NodeID = kadem.NodeID
-                fmt.Printf("sender NodeID: %v\n", ping.Sender.NodeID)
-                ping.Sender.Host = host
-                ping.Sender.Port = port
-                var pong_from_host kademlia.Pong
-                host_to_ping := cmdline_args[1]
-                if strings.Contains(host_to_ping, ":") {
-                } else {
-                    //If only port given, host is localhost
-                    s := []string{"localhost:", host_to_ping}
-                    host_to_ping = strings.Join(s, "") 
-                }
-                remoteIP, remotePort := kademlia.PeerStrToHostPort(host_to_ping)
-                fmt.Printf("IP to ping: %v\n peer: %v\n", remoteIP, remotePort)
-                pong_from_host, err = kademlia.CallPing(kadem, remoteIP, remotePort)
-                if err != nil {
-                    log.Fatal("ReadLine failed: ", cmd_err)
-                }
-                log.Printf("pong MsgID: %v\n", pong_from_host.MsgID.AsString())
-
             case "test_update":
                 kademlia.TestUpdate(kadem, 3)
-        }
+            case "test_store_local":
+                contact := new(kademlia.Contact)
+                contact.NodeID = kadem.NodeID
+                contact.Host = kadem.Host
+                contact.Port = kadem.Port
+                key := kademlia.NewRandomID()
+                val := make([]byte, 5)
+                x := 2
+                for i := 0; i < len(val); i++ {
+                    val[i] = byte(x)
+                    x++
+                }
+                kademlia.CallStore(contact, key, val)
+
+                res := new(kademlia.FindValueResult)
+                res, err := kademlia.CallFindValue(kadem, contact, key)
+                if err != nil {
+                    fmt.Printf("err")
+                }
+                fmt.Printf("value found is: %v\n", res.Value)
+            case "test_store_remote":
+              data_key := kademlia.NewRandomID()
+              dummy_data := make([]byte, 5)
+              x := 1
+              for i := 0; i < len(dummy_data); i++ {
+                dummy_data[i] = byte(x)
+                x++
+              }
+              fmt.Printf("data to be stored: %v at key: %v\n", dummy_data,
+              data_key)
+              storedIn, err := kademlia.IterativeStore(kadem, data_key,
+              dummy_data)
+              if err != nil{
+                log.Printf("%v\n", err)
+                break
+              }
+              fmt.Printf("%v stored in %v\n", data_key, storedIn[len(storedIn)-1])
+              //store value first
+                //get the other peer to search for it 
+              retID, foundValue, err := kademlia.IterativeFindValue(kadem, data_key)
+              if err != nil{
+                fmt.Printf("%v\n", err)
+                break
+              }
+              fmt.Printf("%v %v\n", retID, foundValue)
+            
+            case "get_stored_values":
+              fmt.Printf("stored values in Node %v are %v\n", kadem.NodeID,
+              kadem.Data)
+          }
     }
 }
 

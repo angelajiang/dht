@@ -132,7 +132,7 @@ func IterativeFindValue(k *Kademlia, key ID) (retID ID, foundValue []byte, e err
     Shortlist_Loop:
     for {
         //Exit conditions
-        if updatedClosestContact == false{
+        if updatedClosestContact == false {
             fmt.Printf("IFN: exit condition 1\n")
             break Shortlist_Loop
         }
@@ -170,7 +170,7 @@ func IterativeFindValue(k *Kademlia, key ID) (retID ID, foundValue []byte, e err
                 case response := <- main_chan:
                     //UPDATE
                     //TODO: do something with response.Err?
-                    for _,c := range response.Contacts{
+                    for _,c := range response.Contacts {
                         cur := c
                         Update(k, &cur)
                     }
