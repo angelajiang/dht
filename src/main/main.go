@@ -306,15 +306,19 @@ func main() {
                 }
                 fmt.Printf("value found is: %v\n", res.Value)
             case "test_store_remote":
+              //make random key for storing
               data_key := kademlia.NewRandomID()
+              //make random byte array for the value
               dummy_data := make([]byte, 5)
               x := 1
+              //turn it into a [1 2 3 4 5] array instead of [0 0 0 0 0]
               for i := 0; i < len(dummy_data); i++ {
                 dummy_data[i] = byte(x)
                 x++
               }
               fmt.Printf("data to be stored: %v at key: %v\n", dummy_data,
               data_key)
+              //call iterativestore
               storedIn, err := kademlia.IterativeStore(kadem, data_key,
               dummy_data)
               if err != nil{
@@ -322,8 +326,7 @@ func main() {
                 break
               }
               fmt.Printf("%v stored in %v\n", data_key, storedIn[len(storedIn)-1])
-              //store value first
-                //get the other peer to search for it 
+              //call iterativefindvalue for that value
               retID, foundValue, err := kademlia.IterativeFindValue(kadem, data_key)
               if err != nil{
                 fmt.Printf("%v\n", err)
