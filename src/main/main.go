@@ -11,6 +11,7 @@ import (
     "bufio"
     "os"
     "strings"
+    "strconv"
 )
 
 import (
@@ -19,6 +20,8 @@ import (
 
 func main() {
 
+    var err error
+
     // By default, Go seeds its RNG with 1. This would cause every program to
     // generate the same sequence of IDs.
     rand.Seed(time.Now().UnixNano())
@@ -26,35 +29,37 @@ func main() {
     // Get the bind and connect connection strings from command-line arguments.
     flag.Parse()
     args := flag.Args()
-    if len(args) != 2 {
-        log.Fatal("Must be invoked with exactly two arguments!\n")
+    if len(args) != 3 {
+        log.Fatal("<host>:<port> <host>:<port> <debugmode 0/1>")
     }
-    listen_str := args[0]
-    first_peer_str := args[1]
+    var listenStr string = args[0]
+    var firstPeerStr string = args[1]
+    var debug bool = false
+    var paramDebug int
+    paramDebug, _ = strconv.Atoi(args[2])
+    if (paramDebug == 1){
+        debug = true
+    }
 
-    fmt.Printf("kademlia starting up!\n")
-    host, port := kademlia.PeerStrToHostPort(listen_str)
-    //fmt.Printf("host: %v\n", host)
+    host, port := kademlia.PeerStrToHostPort(listenStr)
 
-    //FOR DEBUGGING!!!!
-    port = uint16(kademlia.Random(4000,5000))
-    fmt.Printf("port: %v\n", port)
-    listen_str = kademlia.HostPortToPeerStr(host, port)
+    if (debug){
+        log.Printf("DEBUG MODE: %v\n", debug)
+        port = uint16(kademlia.Random(4000,5000))
+        fmt.Printf("port: %v\n", port)
+        listenStr = kademlia.HostPortToPeerStr(host, port)
+    }
     
     kadem := kademlia.NewKademlia(host, port)
-    //fmt.Printf("kadem NodeID: %v\n", kadem.NodeID)
     rpc.Register(kadem)
     rpc.HandleHTTP()
-    l, err := net.Listen("tcp", listen_str)
+    l, err := net.Listen("tcp", listenStr)
     if err != nil {
         log.Fatal("Listen: ", err)
     }
-    //kademlia.TestUpdate(kadem, 6)
-    //kademlia.TestPingFirstPeer(kadem, first_peer_str)
 
     // Serve forever.
     go http.Serve(l, nil)
-
 
     /* looping forever, reading from stdin */
     for {
@@ -74,7 +79,7 @@ func main() {
                 kadem.NodeID = kademlia.HexDigitToID(d, 20)
             case "test":
                 //test
-                kademlia.TestBasicRPCs(kadem, first_peer_str)
+                kademlia.TestBasicRPCs(kadem, firstPeerStr)
             case "ping":
                 //ping 123.12.12.0 1231
                 //ping 1111 --> will ping localhost:1111
